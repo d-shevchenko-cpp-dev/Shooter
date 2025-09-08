@@ -1,0 +1,19 @@
+# IDE
+.vscode/
+.vs/
+*.sln
+.idea/
+
+# Compiled files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+Plugins/
+
+# Build artifacts
+*.pdb
+*.exe
+*.dll
+
