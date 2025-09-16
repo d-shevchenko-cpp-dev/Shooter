@@ -4,7 +4,6 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/STUCharacterMovementComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -55,6 +54,19 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 bool ASTUBaseCharacter::IsRunning() const
 {
     return IsCharacterMoving && IsCharacterRunning && !GetVelocity().IsZero();
+}
+
+float ASTUBaseCharacter::GetMovementDirection() const
+{
+    if (GetVelocity().IsZero())
+    {
+        return 0.f;
+    }
+    const auto VelocityNormal = GetVelocity().GetSafeNormal();
+    const auto AngleBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
+    const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
+    const auto Degrees = FMath::DegreesToRadians(AngleBetween);
+    return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
 
 void ASTUBaseCharacter::MoveForward(float Amount)
