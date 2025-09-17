@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "STUBaseCharacter.generated.h"
 
+class UTextRenderComponent;
+class USTUHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -24,6 +26,12 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     USpringArmComponent* SpringArmComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    USTUHealthComponent* HealthComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UTextRenderComponent* HealthTextComponent;
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
