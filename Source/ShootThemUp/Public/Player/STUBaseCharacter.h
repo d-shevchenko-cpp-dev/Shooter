@@ -17,8 +17,21 @@ class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
-    // Sets default values for this character's properties
     ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer);
+
+protected:
+    virtual void BeginPlay() override;
+
+public:
+    virtual void Tick(float DeltaTime) override;
+    
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    UFUNCTION(BlueprintCallable, Category="Movement")
+    bool IsRunning() const;
+
+    UFUNCTION(BlueprintCallable, Category="Movement")
+    float GetMovementDirection() const;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
@@ -33,21 +46,8 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     UTextRenderComponent* HealthTextComponent;
 
-    // Called when the game starts or when spawned
-    virtual void BeginPlay() override;
-
-public:
-    // Called every frame
-    virtual void Tick(float DeltaTime) override;
-
-    // Called to bind functionality to input
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    UFUNCTION(BlueprintCallable, Category="Movement")
-    bool IsRunning() const;
-
-    UFUNCTION(BlueprintCallable, Category="Movement")
-    float GetMovementDirection() const;
+    UPROPERTY(EditDefaultsOnly, Category="Animation")
+    UAnimMontage* DeathAnimMontage;
 
 private:
     void MoveForward(float Amount);
@@ -57,6 +57,10 @@ private:
     void OnStartRunning();
     
     void OnStopRunning();
+
+    void OnDeath();
+
+    void OnHealthChanged(float Health);
 
 private:
     bool IsCharacterRunning { false };
