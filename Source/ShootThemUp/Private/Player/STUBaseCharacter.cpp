@@ -7,6 +7,7 @@
 #include "Components/STUHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Controller.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacter, All, All);
 
@@ -79,11 +80,13 @@ float ASTUBaseCharacter::GetMovementDirection() const
     {
         return 0.f;
     }
+
     const auto VelocityNormal = GetVelocity().GetSafeNormal();
     const auto AngleBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
     const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
-    const auto Degrees = FMath::DegreesToRadians(AngleBetween);
-    return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
+
+    const float Degrees = FMath::RadiansToDegrees(AngleBetween);
+    return FMath::IsNearlyZero(CrossProduct.Z) ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
 
 void ASTUBaseCharacter::MoveForward(float Amount)
@@ -119,6 +122,11 @@ void ASTUBaseCharacter::OnDeath()
     GetCharacterMovement()->DisableMovement();
 
     SetLifeSpan(5.0f);
+
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float Health)
