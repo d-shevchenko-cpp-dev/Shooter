@@ -40,10 +40,10 @@ void ASTUBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(HealthComponent);
     OnHealthChanged(HealthComponent->GetHealth());
     
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
-    check(GetCharacterMovement());
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
 }
 
@@ -119,6 +119,7 @@ void ASTUBaseCharacter::OnDeath()
         PlayAnimMontage(DeathAnimMontage);
     }
 
+    check(GetCharacterMovement());
     GetCharacterMovement()->DisableMovement();
 
     SetLifeSpan(5.0f);

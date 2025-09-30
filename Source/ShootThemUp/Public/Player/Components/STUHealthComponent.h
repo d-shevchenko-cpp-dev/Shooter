@@ -15,7 +15,6 @@ class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
-    // Sets default values for this component's properties
     USTUHealthComponent();
 
     float GetHealth() const;
@@ -28,7 +27,6 @@ public:
     FOnHealthChanged OnHealthChanged;
 
 protected:
-    // Called when the game starts
     virtual void BeginPlay() override;
 
 private:
@@ -36,10 +34,28 @@ private:
     void OnTakeAnyDamageHandle(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy,
         AActor* DamageCauser);
 
+    void HealUpdate();
+
+    void SetHealth(float NewHealth);
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta=(ClampMin = 0.f, ClampMax = 1000.f))
-    float MaxHealth{100.f};
+    float MaxHealth {100.f};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    bool AutoHeal {false};
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    float HealUpdateTime {0.3f};
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    float HealDelay {3.f};
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    float HealModifier {1.f};
 
 private:
-    float Health{0.f};
+    FTimerHandle HealTimerHandle;
+    
+    float Health {0.f};
 };
