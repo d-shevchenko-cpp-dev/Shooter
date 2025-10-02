@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "STUBaseCharacter.generated.h"
 
+class ASTUBaseWeapon;
 class UTextRenderComponent;
 class USTUHealthComponent;
 class USpringArmComponent;
@@ -24,7 +25,7 @@ protected:
 
 public:
     virtual void Tick(float DeltaTime) override;
-    
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     UFUNCTION(BlueprintCallable, Category="Movement")
@@ -32,6 +33,24 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Movement")
     float GetMovementDirection() const;
+
+private:
+    UFUNCTION()
+    void OnGroundLanded(const FHitResult& Hit);
+
+    void MoveForward(float Amount);
+
+    void MoveRight(float Amount);
+
+    void OnStartRunning();
+
+    void OnStopRunning();
+
+    void OnDeath();
+
+    void OnHealthChanged(float Health);
+
+    void SpawnWeapon();
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
@@ -50,29 +69,16 @@ protected:
     UAnimMontage* DeathAnimMontage;
 
     UPROPERTY(EditDefaultsOnly, Category="Movement")
-    FVector2D LandedDamageVelocity = FVector2D(900.f, 1200.f);
+    FVector2D LandedDamageVelocity{FVector2D(900.f, 1200.f)};
 
     UPROPERTY(EditDefaultsOnly, Category="Movement")
-    FVector2D LandedDamage = FVector2D(10.f, 100.f);
+    FVector2D LandedDamage{FVector2D(10.f, 100.f)};
+
+    UPROPERTY(EditDefaultsOnly, Category="Weapon")
+    TSubclassOf<ASTUBaseWeapon> WeaponClass;
 
 private:
-    void MoveForward(float Amount);
+    bool IsCharacterRunning{false};
 
-    void MoveRight(float Amount);
-
-    void OnStartRunning();
-    
-    void OnStopRunning();
-
-    void OnDeath();
-
-    void OnHealthChanged(float Health);
-
-    UFUNCTION()
-    void OnGroundLanded(const FHitResult& Hit);
-
-private:
-    bool IsCharacterRunning { false };
-
-    bool IsCharacterMoving { false };
+    bool IsCharacterMoving{false};
 };
