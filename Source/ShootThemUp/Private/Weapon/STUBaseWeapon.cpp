@@ -4,12 +4,18 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 
-// Sets default values
+DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
+
 ASTUBaseWeapon::ASTUBaseWeapon()
 {
     PrimaryActorTick.bCanEverTick = false;
 
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+}
+
+void ASTUBaseWeapon::Fire()
+{
+    UE_LOG(LogBaseWeapon, Display, TEXT("Fire"));
 }
 
 // Called when the game starts or when spawned

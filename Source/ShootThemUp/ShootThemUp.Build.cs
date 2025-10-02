@@ -16,6 +16,7 @@ public class ShootThemUp : ModuleRules
 		{
 			"ShootThemUp/Public/Player",
 			"ShootThemUp/Public/Player/Components",
+			"ShootThemUp/Public/Components",
 			"ShootThemUp/Public/Dev",
 			"ShootThemUp/Public/Weapon",
 			"ShootThemUp/Public/UI",

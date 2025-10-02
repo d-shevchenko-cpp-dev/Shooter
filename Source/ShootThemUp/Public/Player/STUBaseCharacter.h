@@ -6,11 +6,11 @@
 #include "GameFramework/Character.h"
 #include "STUBaseCharacter.generated.h"
 
-class ASTUBaseWeapon;
 class UTextRenderComponent;
 class USTUHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class USTUWeaponComponent;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -50,8 +50,6 @@ private:
 
     void OnHealthChanged(float Health);
 
-    void SpawnWeapon();
-
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     UCameraComponent* CameraComponent;
@@ -65,6 +63,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     UTextRenderComponent* HealthTextComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    USTUWeaponComponent* WeaponComponent;
+
     UPROPERTY(EditDefaultsOnly, Category="Animation")
     UAnimMontage* DeathAnimMontage;
 
@@ -73,9 +74,6 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category="Movement")
     FVector2D LandedDamage{FVector2D(10.f, 100.f)};
-
-    UPROPERTY(EditDefaultsOnly, Category="Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
 
 private:
     bool IsCharacterRunning{false};
