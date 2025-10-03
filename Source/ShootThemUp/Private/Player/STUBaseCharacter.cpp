@@ -12,71 +12,79 @@
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacter, All, All);
 
-// Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer.SetDefaultSubobjectClass<USTUCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-    // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
+    // Initialize Spring Arm Component
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
     check(SpringArmComponent);
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
-    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
+    SpringArmComponent->SocketOffset = FVector(0.0f, SPRING_ARM_SOCKET_OFFSET_Y, SPRING_ARM_SOCKET_OFFSET_Z);
 
+    // Initialize Camera Component
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     check(CameraComponent);
     CameraComponent->SetupAttachment(SpringArmComponent);
 
+    // Initialize Health Component
     HealthComponent = CreateDefaultSubobject<USTUHealthComponent>(TEXT("HealthComponent"));
     check(HealthComponent);
 
+    // Initialize Health Text Component
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthTextComponent"));
     check(HealthTextComponent);
     HealthTextComponent->SetupAttachment(GetRootComponent());
     HealthTextComponent->SetOwnerNoSee(true);
 
+    // Initialize Weapon Component
     WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>(TEXT("WeaponComponent"));
     check(WeaponComponent);
 }
 
-// Called when the game starts or when spawned
 void ASTUBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    // Initialize health display
     check(HealthComponent);
     OnHealthChanged(HealthComponent->GetHealth());
     
+    // Bind health component events
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
 
+    // Bind landing delegate for fall damage
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
-// Called every frame
 void ASTUBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
 void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
     check(PlayerInputComponent);
     check(WeaponComponent);
 
+    // Movement input bindings
     PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
+    
+    // Camera input bindings
     PlayerInputComponent->BindAxis("LookUp", this, &ASTUBaseCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("TurnAround", this, &ASTUBaseCharacter::AddControllerYawInput);
 
+    // Action input bindings
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
     
+    // Weapon input bindings
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
 }
 
@@ -125,16 +133,20 @@ void ASTUBaseCharacter::OnDeath()
 {
     UE_LOG(BaseCharacter, All, TEXT("Player %s is dead"), *GetName());
 
+    // Play death animation if available
     if (DeathAnimMontage)
     {
         PlayAnimMontage(DeathAnimMontage);
     }
 
+    // Disable character movement
     check(GetCharacterMovement());
     GetCharacterMovement()->DisableMovement();
 
-    SetLifeSpan(5.0f);
+    // Set lifespan before destruction
+    SetLifeSpan(DEATH_LIFESPAN);
 
+    // Change controller state to spectating
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
@@ -148,13 +160,16 @@ void ASTUBaseCharacter::OnHealthChanged(float Health)
 
 void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
+    // Calculate fall velocity (negative Z velocity)
     const auto FallVelocityZ = GetCharacterMovement()->Velocity.Z * -1;
 
+    // Check if fall velocity is below minimum damage threshold
     if (FallVelocityZ < LandedDamageVelocity.X)
     {
         return;
     }
 
+    // Calculate damage based on fall velocity using mapped range
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
