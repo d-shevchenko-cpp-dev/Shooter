@@ -21,7 +21,12 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    void MakeShot();
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FName MuzzleSocketName { "MuzzleSocket" };
 };
