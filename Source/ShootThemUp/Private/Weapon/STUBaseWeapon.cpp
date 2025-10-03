@@ -35,51 +35,112 @@ void ASTUBaseWeapon::BeginPlay()
 
 void ASTUBaseWeapon::MakeShot()
 {
-    if (!GetWorld())
+    if (!IsValidForShooting())
     {
         return;
     }
 
-    auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player)
-    {
-        return;
-    }
-
-    // Получаем PlayerController для определения направления выстрела
-    auto PlayerController = Player->GetController<APlayerController>();
-    if (!PlayerController)
-    {
-        return;
-    }
+    const ACharacter* Player = Cast<ACharacter>(GetOwner());
+    const APlayerController* PlayerController = Player->GetController<APlayerController>();
     
-    // Получаем позицию и направление камеры (откуда смотрит игрок)
+    // Get camera position and direction
     FVector CameraLocation;
     FRotator CameraRotation;
     PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
     
-    // Трассировка начинается от сокета дула оружия
+    // Determine trace points
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
-    
-    // Конечная точка определяется направлением камеры (прицела)
-    const FVector TraceEnd = CameraLocation + CameraRotation.Vector() * 2000.0f; // Дальность выстрела 20 метров 
+    const FVector TraceEnd = CameraLocation + CameraRotation.Vector() * MaxRange;
 
-    // Выполняем line trace
+    // Perform line trace
     FHitResult HitResult;
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(GetOwner()); // Игнорируем владельца оружия
-    QueryParams.bReturnPhysicalMaterial = true;
+    PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
-    GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
+    // Display debug information
+    if (bDrawDebugTrace)
+    {
+        DrawDebugTrace(TraceStart, TraceEnd, HitResult);
+    }
 
-    // Визуализация трассировки для отладки
-    DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-
+    // Process hit result
     if (HitResult.bBlockingHit)
     {
-        // Если попали в цель
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 3.0f);
-        UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
+        UE_LOG(LogBaseWeapon, Display, TEXT("Hit target at bone: %s"), *HitResult.BoneName.ToString());
+    }
+}
+
+bool ASTUBaseWeapon::IsValidForShooting() const
+{
+    if (!GetWorld())
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("World is not valid"));
+        return false;
+    }
+
+    if (!WeaponMesh)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("WeaponMesh is not valid"));
+        return false;
+    }
+
+    const ACharacter* Player = Cast<ACharacter>(GetOwner());
+    if (!Player)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is not a Character"));
+        return false;
+    }
+
+    const APlayerController* PlayerController = Player->GetController<APlayerController>();
+    if (!PlayerController)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("PlayerController is not valid"));
+        return false;
+    }
+
+    return true;
+}
+
+void ASTUBaseWeapon::PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const
+{
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(GetOwner());
+    QueryParams.bReturnPhysicalMaterial = true;
+
+    GetWorld()->LineTraceSingleByChannel(
+        HitResult, 
+        TraceStart, 
+        TraceEnd, 
+        ECollisionChannel::ECC_Visibility, 
+        QueryParams
+    );
+}
+
+void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const
+{
+    // Draw trace line
+    DrawDebugLine(
+        GetWorld(), 
+        TraceStart, 
+        TraceEnd, 
+        FColor::Red, 
+        false, 
+        DebugTraceDuration, 
+        0, 
+        3.0f
+    );
+
+    // If hit target, draw sphere at impact point
+    if (HitResult.bBlockingHit)
+    {
+        DrawDebugSphere(
+            GetWorld(), 
+            HitResult.ImpactPoint, 
+            DebugHitSphereRadius, 
+            24, 
+            FColor::Red, 
+            false, 
+            DebugTraceDuration
+        );
     }
 }

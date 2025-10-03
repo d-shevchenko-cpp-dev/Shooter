@@ -27,6 +27,23 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
     FName MuzzleSocketName { "MuzzleSocket" };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "100.0", ClampMax = "10000.0"))
+    float MaxRange { 2000.0f };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
+    bool bDrawDebugTrace { false };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (EditCondition = "bDrawDebugTrace"))
+    float DebugTraceDuration { 3.0f };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (EditCondition = "bDrawDebugTrace"))
+    float DebugHitSphereRadius { 10.0f };
+
+private:
+    void PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const;
+    void DrawDebugTrace(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const;
+    bool IsValidForShooting() const;
 };
