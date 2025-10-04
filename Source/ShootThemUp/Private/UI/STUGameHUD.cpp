@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #include "UI/STUGameHUD.h"
 #include "Engine/Canvas.h"

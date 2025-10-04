@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #pragma once
 
@@ -7,7 +7,8 @@
 #include "STUGameHUD.generated.h"
 
 /**
- * 
+ * HUD (Heads-Up Display) для игры ShootThemUp.
+ * Отображает игровой интерфейс, включая прицел.
  */
 UCLASS()
 class SHOOTTHEMUP_API ASTUGameHUD : public AHUD

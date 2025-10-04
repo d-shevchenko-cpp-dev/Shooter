@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #include "STUBaseCharacter.h"
 #include "Camera/CameraComponent.h"
@@ -17,29 +17,29 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // Initialize Spring Arm Component
+    // Инициализация Spring Arm компонента
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
     check(SpringArmComponent);
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
     SpringArmComponent->SocketOffset = FVector(0.0f, SPRING_ARM_SOCKET_OFFSET_Y, SPRING_ARM_SOCKET_OFFSET_Z);
 
-    // Initialize Camera Component
+    // Инициализация Camera компонента
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     check(CameraComponent);
     CameraComponent->SetupAttachment(SpringArmComponent);
 
-    // Initialize Health Component
+    // Инициализация Health компонента
     HealthComponent = CreateDefaultSubobject<USTUHealthComponent>(TEXT("HealthComponent"));
     check(HealthComponent);
 
-    // Initialize Health Text Component
+    // Инициализация Health Text компонента
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthTextComponent"));
     check(HealthTextComponent);
     HealthTextComponent->SetupAttachment(GetRootComponent());
     HealthTextComponent->SetOwnerNoSee(true);
 
-    // Initialize Weapon Component
+    // Инициализация Weapon компонента
     WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>(TEXT("WeaponComponent"));
     check(WeaponComponent);
 }
@@ -48,15 +48,15 @@ void ASTUBaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Initialize health display
+    // Инициализация отображения здоровья
     check(HealthComponent);
     OnHealthChanged(HealthComponent->GetHealth());
     
-    // Bind health component events
+    // Привязка событий компонента здоровья
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
 
-    // Bind landing delegate for fall damage
+    // Привязка делегата приземления для урона от падения
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
@@ -71,20 +71,20 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     check(PlayerInputComponent);
     check(WeaponComponent);
 
-    // Movement input bindings
+    // Привязки ввода движения
     PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
     
-    // Camera input bindings
+    // Привязки ввода камеры
     PlayerInputComponent->BindAxis("LookUp", this, &ASTUBaseCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("TurnAround", this, &ASTUBaseCharacter::AddControllerYawInput);
 
-    // Action input bindings
+    // Привязки действий
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
     
-    // Weapon input bindings
+    // Привязки оружия
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
 }
 
@@ -133,20 +133,20 @@ void ASTUBaseCharacter::OnDeath()
 {
     UE_LOG(BaseCharacter, All, TEXT("Player %s is dead"), *GetName());
 
-    // Play death animation if available
+    // Воспроизведение анимации смерти, если доступна
     if (DeathAnimMontage)
     {
         PlayAnimMontage(DeathAnimMontage);
     }
 
-    // Disable character movement
+    // Отключение движения персонажа
     check(GetCharacterMovement());
     GetCharacterMovement()->DisableMovement();
 
-    // Set lifespan before destruction
+    // Установка времени жизни перед уничтожением
     SetLifeSpan(DEATH_LIFESPAN);
 
-    // Change controller state to spectating
+    // Изменение состояния контроллера на наблюдение
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
@@ -160,16 +160,16 @@ void ASTUBaseCharacter::OnHealthChanged(float Health)
 
 void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
-    // Calculate fall velocity (negative Z velocity)
+    // Вычисление скорости падения (отрицательная Z скорость)
     const auto FallVelocityZ = GetCharacterMovement()->Velocity.Z * -1;
 
-    // Check if fall velocity is below minimum damage threshold
+    // Проверка, если скорость падения ниже минимального порога урона
     if (FallVelocityZ < LandedDamageVelocity.X)
     {
         return;
     }
 
-    // Calculate damage based on fall velocity using mapped range
+    // Вычисление урона на основе скорости падения с использованием сопоставленного диапазона
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }

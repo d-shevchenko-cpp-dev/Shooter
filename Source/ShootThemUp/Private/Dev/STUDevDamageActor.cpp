@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 
 #include "Dev/STUDevDamageActor.h"
@@ -7,23 +7,23 @@
 #include "Dev/STUFireDamageType.h"
 #include "Dev/STUIceDamageType.h"
 
-// Sets default values
+// Установка значений по умолчанию
 ASTUDevDamageActor::ASTUDevDamageActor()
 {
-    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    // Установка этого актора для вызова Tick() каждый кадр. Вы можете отключить это для улучшения производительности, если вам это не нужно.
     PrimaryActorTick.bCanEverTick = true;
 
     SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
     SetRootComponent(SceneComponent);
 }
 
-// Called when the game starts or when spawned
+// Вызывается при запуске игры или при появлении
 void ASTUDevDamageActor::BeginPlay()
 {
     Super::BeginPlay();
 }
 
-// Called every frame
+// Вызывается каждый кадр
 void ASTUDevDamageActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);

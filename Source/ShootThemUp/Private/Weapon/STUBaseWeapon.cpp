@@ -1,12 +1,12 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 
 #include "Weapon/STUBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "engine/World.h"
+#include "Components/STUDamageComponent.h"
+#include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
-#include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -17,6 +17,7 @@ ASTUBaseWeapon::ASTUBaseWeapon()
     PrimaryActorTick.bCanEverTick = false;
 
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+    DamageComponent = CreateDefaultSubobject<USTUDamageComponent>("DamageComponent");
 }
 
 void ASTUBaseWeapon::Fire()
@@ -26,7 +27,7 @@ void ASTUBaseWeapon::Fire()
     MakeShot();
 }
 
-// Called when the game starts or when spawned
+// Вызывается при запуске игры или при появлении
 void ASTUBaseWeapon::BeginPlay()
 {
     Super::BeginPlay();
@@ -41,32 +42,49 @@ void ASTUBaseWeapon::MakeShot()
     }
 
     const ACharacter* Player = Cast<ACharacter>(GetOwner());
-    const APlayerController* PlayerController = Player->GetController<APlayerController>();
+    if (!Player)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is not a Character"));
+        return;
+    }
     
-    // Get camera position and direction
+    const APlayerController* PlayerController = Player->GetController<APlayerController>();
+    if (!PlayerController)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("PlayerController is not valid"));
+        return;
+    }
+    
+    // Получение позиции и направления камеры
     FVector CameraLocation;
     FRotator CameraRotation;
     PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
     
-    // Determine trace points
+    // Определение точек трейсинга
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
     const FVector TraceEnd = CameraLocation + CameraRotation.Vector() * MaxRange;
 
-    // Perform line trace
+    // Выполнение линейного трейсинга
     FHitResult HitResult;
     PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
-    // Display debug information
+    // Отображение отладочной информации
     if (bDrawDebugTrace)
     {
         DrawDebugTrace(TraceStart, TraceEnd, HitResult);
     }
 
-    // Process hit result
+    // Обработка результата попадания и применение урона
     if (HitResult.bBlockingHit)
     {
         UE_LOG(LogBaseWeapon, Display, TEXT("Hit target at bone: %s"), *HitResult.BoneName.ToString());
+        
+        // Применение урона к пораженной цели
+        if (AActor* HitActor = HitResult.GetActor())
+        {
+            ApplyDamageToTarget(HitActor, HitResult);
+        }
     }
 }
 
@@ -118,7 +136,7 @@ void ASTUBaseWeapon::PerformLineTrace(const FVector& TraceStart, const FVector& 
 
 void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const
 {
-    // Draw trace line
+    // Отрисовка линии трейсинга
     DrawDebugLine(
         GetWorld(), 
         TraceStart, 
@@ -130,7 +148,7 @@ void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart, const FVector& Tr
         3.0f
     );
 
-    // If hit target, draw sphere at impact point
+    // Если попали в цель, рисуем сферу в точке попадания
     if (HitResult.bBlockingHit)
     {
         DrawDebugSphere(
@@ -143,4 +161,34 @@ void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart, const FVector& Tr
             DebugTraceDuration
         );
     }
+}
+
+void ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitResult)
+{
+    if (!Target || !DamageComponent)
+    {
+        return;
+    }
+
+    // Вычисление финального количества урона на основе места попадания
+    float FinalDamage = DamageAmount;
+    bool bIsHeadshot = false;
+
+    // Проверка на headshot
+    if (HitResult.BoneName == HeadBoneName || HitResult.BoneName == NeckBoneName)
+    {
+        FinalDamage *= HeadshotMultiplier;
+        bIsHeadshot = true;
+        UE_LOG(LogBaseWeapon, Log, TEXT("Headshot! Damage multiplied by %f"), HeadshotMultiplier);
+    }
+
+    // Использование компонента урона для нанесения урона
+    DamageComponent->DealDamage(
+        Target,
+        FinalDamage,
+        DamageType,
+        HitResult.ImpactPoint,
+        HitResult.BoneName,
+        bIsHeadshot
+    );
 }

@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #pragma once
 
@@ -7,7 +7,8 @@
 #include "STUGameModeBase.generated.h"
 
 /**
- * 
+ * Базовый игровой режим для ShootThemUp.
+ * Настраивает классы по умолчанию для персонажа, контроллера и HUD.
  */
 UCLASS()
 class SHOOTTHEMUP_API ASTUGameModeBase : public AGameModeBase

@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #pragma once
 
@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "STUDevDamageActor.generated.h"
 
+/**
+ * Актор для разработки, который наносит радиальный урон.
+ * Используется для тестирования системы урона в редакторе.
+ */
 UCLASS()
 class SHOOTTHEMUP_API ASTUDevDamageActor : public AActor
 {

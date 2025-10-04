@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #include "Player/Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
@@ -9,7 +9,7 @@ USTUHealthComponent::USTUHealthComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
     
-    // Validate parameters in constructor
+    // Проверка параметров в конструкторе
     if (!ValidateHealthParameters())
     {
         UE_LOG(LogHealthComponent, Warning, TEXT("Invalid health parameters detected in constructor"));
@@ -51,10 +51,10 @@ void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Initialize health to maximum
+    // Инициализация здоровья до максимального значения
     SetHealth(MaxHealth);
 
-    // Bind damage event if owner exists
+    // Привязка события урона, если владелец существует
     if (AActor* Owner = GetOwner())
     {
         Owner->OnTakeAnyDamage.AddDynamic(this, &USTUHealthComponent::OnTakeAnyDamageHandle);
@@ -69,22 +69,24 @@ void USTUHealthComponent::BeginPlay()
 void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
     class AController* InstigatedBy, AActor* DamageCauser)
 {
-    // Early exit conditions
+    // Условия раннего выхода
     if (Damage <= 0.0f || IsDead() || !GetWorld())
     {
         return;
     }
 
-    UE_LOG(LogHealthComponent, Log, TEXT("Actor %s took %f damage"), 
-        DamagedActor ? *DamagedActor->GetName() : TEXT("Unknown"), Damage);
+    UE_LOG(LogHealthComponent, Log, TEXT("Actor %s took %f damage from %s"), 
+        DamagedActor ? *DamagedActor->GetName() : TEXT("Unknown"), 
+        Damage,
+        DamageCauser ? *DamageCauser->GetName() : TEXT("Unknown"));
 
-    // Apply damage
+    // Применение урона
     SetHealth(Health - Damage);
 
-    // Clear any existing heal timer
+    // Очистка существующего таймера лечения
     GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
     
-    // Handle death or start auto-healing
+    // Обработка смерти или запуск автоматического лечения
     if (IsDead())
     {
         UE_LOG(LogHealthComponent, Warning, TEXT("Actor %s has died"), 
@@ -93,7 +95,7 @@ void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor, float Dama
     }
     else if (AutoHeal)
     {
-        // Start auto-healing timer
+        // Запуск таймера автоматического лечения
         GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, 
             &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
         
@@ -104,10 +106,10 @@ void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor, float Dama
 
 void USTUHealthComponent::HealUpdate()
 {
-    // Add healing amount
+    // Добавление количества лечения
     SetHealth(Health + HealModifier);
 
-    // Stop healing if at full health
+    // Остановка лечения, если на полном здоровье
     if (IsFullHealth() && GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
@@ -121,7 +123,7 @@ void USTUHealthComponent::SetHealth(float NewHealth)
     const float OldHealth = Health;
     Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
     
-    // Only broadcast if health actually changed
+    // Трансляция только если здоровье действительно изменилось
     if (!FMath::IsNearlyEqual(OldHealth, Health, MIN_HEALTH_THRESHOLD))
     {
         OnHealthChanged.Broadcast(Health);

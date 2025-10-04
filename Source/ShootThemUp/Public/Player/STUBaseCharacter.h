@@ -1,4 +1,4 @@
-// ShootThemUp Game. All Right Reserved.
+// Игра ShootThemUp. Все права защищены.
 
 #pragma once
 
@@ -11,10 +11,11 @@ class USTUHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class USTUWeaponComponent;
+class USTUDamageComponent;
 
 /**
- * Base character class for ShootThemUp game.
- * Provides common functionality for all characters including movement, health, and weapon systems.
+ * Базовый класс персонажа для игры ShootThemUp.
+ * Предоставляет общую функциональность для всех персонажей, включая движение, здоровье и системы оружия.
  */
 
 UCLASS()
@@ -31,53 +32,53 @@ protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-    /** Returns true if character is currently running */
+    /** Возвращает true, если персонаж в данный момент бежит */
     UFUNCTION(BlueprintCallable, Category="Movement")
     bool IsRunning() const;
 
-    /** Returns the movement direction angle in degrees */
+    /** Возвращает угол направления движения в градусах */
     UFUNCTION(BlueprintCallable, Category="Movement")
     float GetMovementDirection() const;
 
 private:
-    // Movement input handlers
+    // Обработчики ввода движения
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void OnStartRunning();
     void OnStopRunning();
 
-    // Health and death handlers
+    // Обработчики здоровья и смерти
     void OnDeath();
     void OnHealthChanged(float Health);
     
-    // Landing damage handler
+    // Обработчик урона от приземления
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
 
 protected:
-    // Camera and movement components
+    // Компоненты камеры и движения
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     UCameraComponent* CameraComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     USpringArmComponent* SpringArmComponent;
 
-    // Health system components
+    // Компоненты системы здоровья
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     USTUHealthComponent* HealthComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     UTextRenderComponent* HealthTextComponent;
 
-    // Weapon system component
+    // Компонент системы оружия
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
     USTUWeaponComponent* WeaponComponent;
 
-    // Animation settings
+    // Настройки анимации
     UPROPERTY(EditDefaultsOnly, Category="Animation")
     UAnimMontage* DeathAnimMontage;
 
-    // Landing damage settings
+    // Настройки урона от приземления
     UPROPERTY(EditDefaultsOnly, Category="Movement", meta=(ToolTip="Velocity range for landing damage calculation (min, max)"))
     FVector2D LandedDamageVelocity{FVector2D(900.f, 1200.f)};
 
@@ -85,11 +86,11 @@ protected:
     FVector2D LandedDamage{FVector2D(10.f, 100.f)};
 
 private:
-    // Movement state flags
+    // Флаги состояния движения
     bool IsCharacterRunning{false};
     bool IsCharacterMoving{false};
 
-    // Constants
+    // Константы
     static constexpr float DEATH_LIFESPAN = 5.0f;
     static constexpr float SPRING_ARM_SOCKET_OFFSET_Y = 100.0f;
     static constexpr float SPRING_ARM_SOCKET_OFFSET_Z = 80.0f;
