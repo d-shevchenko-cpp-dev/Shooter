@@ -233,7 +233,57 @@ float ASTUBaseWeapon::GetCachedSpreadRadians() const
     {
         CachedSpreadRadians = FMath::DegreesToRadians(WeaponData.BulletSpread);
     }
+
+    // Применяем модификатор здоровья, если он включен
+    if (WeaponData.bEnableHealthSpreadModifier)
+    {
+        const float HealthSpreadMultiplier = GetHealthSpreadMultiplier();
+        return CachedSpreadRadians * HealthSpreadMultiplier;
+    }
+
     return CachedSpreadRadians;
+}
+
+float ASTUBaseWeapon::GetHealthSpreadMultiplier() const
+{
+    // Получаем владельца оружия
+    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (!OwnerCharacter)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is not a Character, using default spread"));
+        return 1.0f;
+    }
+
+    // Получаем компонент здоровья
+    const USTUHealthComponent* HealthComponent = OwnerCharacter->FindComponentByClass<USTUHealthComponent>();
+    if (!HealthComponent)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Health component not found, using default spread"));
+        return 1.0f;
+    }
+
+    // Получаем процент здоровья
+    const float HealthPercent = HealthComponent->GetHealthPercent();
+
+    // Если здоровье выше порогового значения, разброс не изменяется
+    if (HealthPercent >= WeaponData.HealthSpreadThreshold)
+    {
+        return 1.0f;
+    }
+
+    // Вычисляем множитель разброса на основе здоровья
+    // Чем меньше здоровья, тем больше разброс
+    const float HealthRatio = HealthPercent / WeaponData.HealthSpreadThreshold;
+    const float SpreadMultiplier = FMath::Lerp(WeaponData.MaxHealthSpreadMultiplier, 1.0f, HealthRatio);
+
+    UE_LOG(LogBaseWeapon,
+        VeryVerbose,
+        TEXT("Health-based spread: HealthPercent=%.2f, Threshold=%.2f, Multiplier=%.2f"),
+        HealthPercent,
+        WeaponData.HealthSpreadThreshold,
+        SpreadMultiplier);
+
+    return SpreadMultiplier;
 }
 
 void ASTUBaseWeapon::PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const

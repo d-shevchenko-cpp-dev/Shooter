@@ -93,6 +93,33 @@ struct SHOOTTHEMUP_API FSTUWeaponData
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
     TSubclassOf<UDamageType> DamageType;
 
+    /** Включить влияние здоровья на разброс выстрелов */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Weapon Settings",
+        meta = (ToolTip = "Включить модификацию разброса на основе здоровья"))
+    bool bEnableHealthSpreadModifier = false;
+
+    /** Пороговое значение здоровья для начала увеличения разброса (в процентах от 0.0 до 1.0) */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Weapon Settings",
+        meta = (EditCondition = "bEnableHealthSpreadModifier",
+            ClampMin = "0.0",
+            ClampMax = "1.0",
+            ToolTip = "Порог здоровья, ниже которого начинает увеличиваться разброс"))
+    float HealthSpreadThreshold = 0.3f;
+
+    /** Максимальный множитель разброса при критически низком здоровье */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Weapon Settings",
+        meta = (EditCondition = "bEnableHealthSpreadModifier",
+            ClampMin = "1.0",
+            ClampMax = "10.0",
+            ToolTip = "Максимальный множитель разброса при критически низком здоровье"))
+    float MaxHealthSpreadMultiplier = 3.0f;
+
     FSTUWeaponData()
     {
         MaxRange = 2000.0f;
@@ -103,6 +130,9 @@ struct SHOOTTHEMUP_API FSTUWeaponData
         HeadBoneName = TEXT("b_head");
         NeckBoneName = TEXT("b_Neck");
         DamageType = nullptr;
+        bEnableHealthSpreadModifier = false;
+        HealthSpreadThreshold = 0.3f;
+        MaxHealthSpreadMultiplier = 3.0f;
     }
 };
 
@@ -300,4 +330,10 @@ private:
      * @return Разброс в радианах
      */
     float GetCachedSpreadRadians() const;
+
+    /**
+     * Получает множитель разброса на основе текущего здоровья владельца.
+     * @return Множитель разброса (1.0 = без изменений, >1.0 = увеличенный разброс)
+     */
+    float GetHealthSpreadMultiplier() const;
 };
