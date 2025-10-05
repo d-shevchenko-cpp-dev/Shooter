@@ -32,37 +32,8 @@ ASTUBaseWeapon::ASTUBaseWeapon()
     DebugData = FSTUWeaponDebugData();
 }
 
-void ASTUBaseWeapon::Fire()
-{
-    if (!CanFire())
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Cannot fire weapon"));
-        return;
-    }
-
-    UE_LOG(LogBaseWeapon, Display, TEXT("Starting fire"));
-
-    // Выполняем первый выстрел немедленно
-    MakeShot();
-
-    // Устанавливаем таймер для автоматической стрельбы
-    if (WeaponData.ShotDelay > 0.0f)
-    {
-        GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, WeaponData.ShotDelay, true);
-    }
-
-    // Вызываем событие начала стрельбы
-    OnWeaponFireStarted.Broadcast();
-}
-
-void ASTUBaseWeapon::StopFire()
-{
-    UE_LOG(LogBaseWeapon, Display, TEXT("Stopping fire"));
-    GetWorldTimerManager().ClearTimer(ShotTimerHandle);
-
-    // Вызываем событие остановки стрельбы
-    OnWeaponFireStopped.Broadcast();
-}
+// Fire() и StopFire() теперь виртуальные пустые методы
+// Конкретная логика стрельбы должна быть реализована в дочерних классах
 
 bool ASTUBaseWeapon::CanFire() const
 {
@@ -113,90 +84,8 @@ void ASTUBaseWeapon::BeginPlay()
     UE_LOG(LogBaseWeapon, Log, TEXT("Weapon initialized successfully"));
 }
 
-void ASTUBaseWeapon::MakeShot()
-{
-    if (!IsValidForShooting())
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Weapon is not valid for shooting"));
-        return;
-    }
-
-    // Получение владельца оружия
-    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (!OwnerCharacter)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("Owner is not a Character"));
-        return;
-    }
-
-    // Получение контроллера игрока
-    const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
-    if (!PlayerController)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("PlayerController is not valid"));
-        return;
-    }
-
-    // Получение позиции и направления камеры
-    FVector CameraLocation;
-    FRotator CameraRotation;
-    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-    // Определение точек трейсинга
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
-    const FVector TraceStart = SocketTransform.GetLocation();
-
-    // Вычисляем направление от позиции оружия к точке, куда смотрит камера
-    const FVector CameraDirection = CameraRotation.Vector();
-    const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
-    const FVector ShootDirection = (TargetPoint - TraceStart).GetSafeNormal();
-    const FVector FinalShootDirection = GetShootDirection(ShootDirection);
-    const FVector TraceEnd = TraceStart + FinalShootDirection * WeaponData.MaxRange;
-
-    // Выполнение линейного трейсинга
-    FHitResult HitResult;
-    PerformLineTrace(TraceStart, TraceEnd, HitResult);
-
-    // Отображение отладочной информации через менеджер
-    if (DebugManager)
-    {
-        DebugManager->DrawTraceLine(GetWorld(), TraceStart, TraceEnd);
-        DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
-        DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
-
-        if (HitResult.bBlockingHit)
-        {
-            DebugManager->DrawHitSphere(GetWorld(), HitResult.ImpactPoint);
-        }
-    }
-
-    // Обработка результата попадания и применение урона
-    float DamageDealt = 0.0f;
-    bool bIsHeadshot = false;
-
-    if (HitResult.bBlockingHit)
-    {
-        UE_LOG(LogBaseWeapon,
-            Log,
-            TEXT("Hit target: %s at bone: %s"),
-            HitResult.GetActor() ? *HitResult.GetActor()->GetName() : TEXT("Unknown"),
-            *HitResult.BoneName.ToString());
-
-        // Применение урона к пораженной цели
-        if (AActor* HitActor = HitResult.GetActor())
-        {
-            bIsHeadshot = IsHeadshot(HitResult.BoneName);
-            DamageDealt = ApplyDamageToTarget(HitActor, HitResult);
-        }
-    }
-    else
-    {
-        UE_LOG(LogBaseWeapon, VeryVerbose, TEXT("Shot missed"));
-    }
-
-    // Вызываем событие выстрела
-    OnWeaponShot.Broadcast(HitResult, DamageDealt, bIsHeadshot);
-}
+// MakeShot() теперь виртуальный пустой метод
+// Конкретная логика выстрела должна быть реализована в дочерних классах
 
 bool ASTUBaseWeapon::IsValidForShooting() const
 {
@@ -407,4 +296,18 @@ void ASTUBaseWeapon::UpdateDebugSettings(const FSTUWeaponDebugSettings& Settings
     {
         DebugManager->UpdateDebugSettings(Settings);
     }
+}
+
+void ASTUBaseWeapon::StartAutomaticFire()
+{
+    // Устанавливаем таймер для автоматической стрельбы
+    if (WeaponData.ShotDelay > 0.0f)
+    {
+        GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, WeaponData.ShotDelay, true);
+    }
+}
+
+void ASTUBaseWeapon::StopAutomaticFire()
+{
+    GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }

@@ -194,17 +194,17 @@ public:
 
     /**
      * Начинает стрельбу из оружия.
-     * Устанавливает таймер для автоматической стрельбы.
+     * Должен быть переопределен в дочерних классах для конкретной логики стрельбы.
      */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void Fire();
+    virtual void Fire() {}
 
     /**
      * Останавливает стрельбу из оружия.
-     * Очищает таймер автоматической стрельбы.
+     * Должен быть переопределен в дочерних классах для конкретной логики остановки стрельбы.
      */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void StopFire();
+    virtual void StopFire() {}
 
     /**
      * Проверяет, может ли оружие стрелять в данный момент.
@@ -273,10 +273,10 @@ protected:
 
     /**
      * Выполняет один выстрел из оружия.
-     * Основная логика стрельбы с трейсингом и нанесением урона.
+     * Должен быть переопределен в дочерних классах для конкретной логики выстрела.
      */
     UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void MakeShot();
+    virtual void MakeShot() {}
 
     /**
      * Выполняет линейный трейсинг от начальной до конечной точки.
@@ -327,6 +327,20 @@ protected:
      */
     UFUNCTION(BlueprintPure, Category = "Weapon")
     virtual bool IsHeadshot(const FName& HitBoneName) const;
+
+    /**
+     * Выполняет автоматическую стрельбу с заданным интервалом.
+     * Может быть переопределен в дочерних классах для кастомной логики автоматической стрельбы.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StartAutomaticFire();
+
+    /**
+     * Останавливает автоматическую стрельбу.
+     * Может быть переопределен в дочерних классах для кастомной логики остановки.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StopAutomaticFire();
 
 protected:
     /** Компонент меша оружия */
