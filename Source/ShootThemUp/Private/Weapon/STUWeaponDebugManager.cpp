@@ -28,7 +28,7 @@ bool USTUWeaponDebugManager::IsDebugEnabledForCategory(ESTUWeaponDebugCategory C
 void USTUWeaponDebugManager::SetDebugEnabledForCategory(ESTUWeaponDebugCategory Category, bool bEnabled)
 {
     const int32 CategoryInt = static_cast<int32>(Category);
-    
+
     if (bEnabled)
     {
         DebugSettings.DebugCategories |= CategoryInt;
@@ -56,13 +56,13 @@ void USTUWeaponDebugManager::DrawTraceLine(UWorld* World, const FVector& Start, 
         return;
     }
 
-    DrawDebugLine(World, 
-        Start, 
-        End, 
-        DebugSettings.TraceLineColor, 
-        false, 
-        DebugSettings.DebugDuration, 
-        0, 
+    DrawDebugLine(World,
+        Start,
+        End,
+        DebugSettings.TraceLineColor,
+        false,
+        DebugSettings.DebugDuration,
+        0,
         DebugSettings.TraceLineThickness);
 }
 
@@ -89,14 +89,7 @@ void USTUWeaponDebugManager::DrawCameraLine(UWorld* World, const FVector& Start,
         return;
     }
 
-    DrawDebugLine(World,
-        Start,
-        End,
-        DebugSettings.CameraLineColor,
-        false,
-        DebugSettings.DebugDuration,
-        0,
-        2.0f);
+    DrawDebugLine(World, Start, End, DebugSettings.CameraLineColor, false, DebugSettings.DebugDuration, 0, 2.0f);
 }
 
 void USTUWeaponDebugManager::DrawSpreadSphere(UWorld* World, const FVector& Location) const

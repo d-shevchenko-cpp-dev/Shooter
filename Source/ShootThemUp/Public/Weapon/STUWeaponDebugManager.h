@@ -13,10 +13,10 @@ UENUM(BlueprintType)
 enum class ESTUWeaponDebugCategory : uint8
 {
     None = 0,
-    Trace = 1 << 0,      // Линии трейсинга
-    Hit = 1 << 1,        // Точки попадания
-    Camera = 1 << 2,     // Направление камеры
-    Spread = 1 << 3,     // Разброс пуль
+    Trace = 1 << 0,  // Линии трейсинга
+    Hit = 1 << 1,    // Точки попадания
+    Camera = 1 << 2, // Направление камеры
+    Spread = 1 << 3, // Разброс пуль
     All = Trace | Hit | Camera | Spread
 };
 
@@ -33,7 +33,10 @@ struct SHOOTTHEMUP_API FSTUWeaponDebugSettings
     bool bEnableDebug = false;
 
     /** Категории отладочной информации для отображения */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (EditCondition = "bEnableDebug"))
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Debug Settings",
+        meta = (EditCondition = "bEnableDebug"))
     int32 DebugCategories = static_cast<int32>(ESTUWeaponDebugCategory::All);
 
     /** Длительность отображения отладочной информации */
@@ -65,19 +68,31 @@ struct SHOOTTHEMUP_API FSTUWeaponDebugSettings
     float SpreadSphereRadius = 5.0f;
 
     /** Цвет линий трейсинга */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (EditCondition = "bEnableDebug"))
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Debug Settings",
+        meta = (EditCondition = "bEnableDebug"))
     FColor TraceLineColor = FColor::Red;
 
     /** Цвет точек попадания */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (EditCondition = "bEnableDebug"))
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Debug Settings",
+        meta = (EditCondition = "bEnableDebug"))
     FColor HitSphereColor = FColor::Red;
 
     /** Цвет направления камеры */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (EditCondition = "bEnableDebug"))
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Debug Settings",
+        meta = (EditCondition = "bEnableDebug"))
     FColor CameraLineColor = FColor::Blue;
 
     /** Цвет разброса пуль */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (EditCondition = "bEnableDebug"))
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Debug Settings",
+        meta = (EditCondition = "bEnableDebug"))
     FColor SpreadColor = FColor::Yellow;
 
     FSTUWeaponDebugSettings()

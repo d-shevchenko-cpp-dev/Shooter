@@ -145,7 +145,7 @@ void ASTUBaseWeapon::MakeShot()
     // Определение точек трейсинга
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
-    
+
     // Вычисляем направление от позиции оружия к точке, куда смотрит камера
     const FVector CameraDirection = CameraRotation.Vector();
     const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
@@ -163,7 +163,7 @@ void ASTUBaseWeapon::MakeShot()
         DebugManager->DrawTraceLine(GetWorld(), TraceStart, TraceEnd);
         DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
         DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
-        
+
         if (HitResult.bBlockingHit)
         {
             DebugManager->DrawHitSphere(GetWorld(), HitResult.ImpactPoint);
