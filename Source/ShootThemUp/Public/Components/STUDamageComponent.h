@@ -10,7 +10,7 @@
  * Компонент, который обрабатывает логику нанесения урона.
  * Предоставляет централизованную функциональность нанесения урона.
  */
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUDamageComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -28,7 +28,7 @@ public:
      * @param bIsHeadshot Является ли это headshot'ом
      * @return True если урон был успешно нанесен
      */
-    UFUNCTION(BlueprintCallable, Category="Damage")
+    UFUNCTION(BlueprintCallable, Category = "Damage")
     bool DealDamage(AActor* Target,
         float DamageAmount,
         TSubclassOf<UDamageType> DamageType,

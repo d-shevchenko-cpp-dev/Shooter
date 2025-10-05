@@ -1,8 +1,10 @@
 # Unreal typical
 Binaries/
+Build/
 DerivedDataCache/
 Intermediate/
 Saved/
+Plugins/Developer/
 .vscode/
 .idea/
 *.VC.db

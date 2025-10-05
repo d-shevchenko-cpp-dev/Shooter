@@ -56,8 +56,7 @@ bool USTUDamageComponent::ApplyDamageInternal(AActor* Target,
     HitResult.ImpactNormal = FVector::UpVector; // Default impact normal
 
     // Применение точечного урона с использованием системы урона Unreal
-    UGameplayStatics::ApplyPointDamage(
-        Target,
+    UGameplayStatics::ApplyPointDamage(Target,
         // Target actor
         DamageAmount,
         // Damage amount
@@ -70,7 +69,7 @@ bool USTUDamageComponent::ApplyDamageInternal(AActor* Target,
         GetOwner(),
         // Damage causer
         DamageType // Damage type
-        );
+    );
 
     UE_LOG(LogDamageComponent,
         Log,

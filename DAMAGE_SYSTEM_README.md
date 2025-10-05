@@ -42,7 +42,7 @@ bool bHealed = HealthComponent->AddHealth(50.0f);
 DamageComponent->DealDamage(TargetActor, 25.0f, DamageTypeClass);
 
 // Нанесение урона с информацией о попадании
-DamageComponent->DealDamage(TargetActor, 25.0f, DamageTypeClass, 
+DamageComponent->DealDamage(TargetActor, 25.0f, DamageTypeClass,
                            HitLocation, BoneName, bIsHeadshot);
 ```
 

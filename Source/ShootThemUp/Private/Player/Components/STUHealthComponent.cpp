@@ -103,12 +103,8 @@ void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor,
     else if (AutoHeal)
     {
         // Запуск таймера автоматического лечения
-        GetWorld()->GetTimerManager().SetTimer(HealTimerHandle,
-            this,
-            &USTUHealthComponent::HealUpdate,
-            HealUpdateTime,
-            true,
-            HealDelay);
+        GetWorld()->GetTimerManager().SetTimer(
+            HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
 
         UE_LOG(LogHealthComponent,
             Log,

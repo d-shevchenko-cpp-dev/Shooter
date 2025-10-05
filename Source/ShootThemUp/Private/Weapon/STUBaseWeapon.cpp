@@ -43,13 +43,7 @@ void ASTUBaseWeapon::Fire()
     // Устанавливаем таймер для автоматической стрельбы
     if (WeaponData.ShotDelay > 0.0f)
     {
-        GetWorldTimerManager().SetTimer(
-            ShotTimerHandle,
-            this,
-            &ASTUBaseWeapon::MakeShot,
-            WeaponData.ShotDelay,
-            true
-            );
+        GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, WeaponData.ShotDelay, true);
     }
 
     // Вызываем событие начала стрельбы
@@ -67,9 +61,7 @@ void ASTUBaseWeapon::StopFire()
 
 bool ASTUBaseWeapon::CanFire() const
 {
-    return IsValidForShooting() &&
-           WeaponData.ShotDelay >= MIN_SHOT_DELAY &&
-           WeaponData.ShotDelay <= MAX_SHOT_DELAY;
+    return IsValidForShooting() && WeaponData.ShotDelay >= MIN_SHOT_DELAY && WeaponData.ShotDelay <= MAX_SHOT_DELAY;
 }
 
 void ASTUBaseWeapon::BeginPlay()
@@ -89,23 +81,20 @@ void ASTUBaseWeapon::BeginPlay()
 
     if (WeaponData.DamageAmount < MIN_DAMAGE || WeaponData.DamageAmount > MAX_DAMAGE)
     {
-        UE_LOG(LogBaseWeapon,
-            Warning,
-            TEXT("Invalid DamageAmount: %f. Clamping to valid range"),
-            WeaponData.DamageAmount);
+        UE_LOG(
+            LogBaseWeapon, Warning, TEXT("Invalid DamageAmount: %f. Clamping to valid range"), WeaponData.DamageAmount);
         WeaponData.DamageAmount = FMath::Clamp(WeaponData.DamageAmount, MIN_DAMAGE, MAX_DAMAGE);
     }
 
-    if (WeaponData.HeadshotMultiplier < MIN_HEADSHOT_MULTIPLIER || WeaponData.HeadshotMultiplier >
-        MAX_HEADSHOT_MULTIPLIER)
+    if (WeaponData.HeadshotMultiplier < MIN_HEADSHOT_MULTIPLIER ||
+        WeaponData.HeadshotMultiplier > MAX_HEADSHOT_MULTIPLIER)
     {
         UE_LOG(LogBaseWeapon,
             Warning,
             TEXT("Invalid HeadshotMultiplier: %f. Clamping to valid range"),
             WeaponData.HeadshotMultiplier);
-        WeaponData.HeadshotMultiplier = FMath::Clamp(WeaponData.HeadshotMultiplier,
-            MIN_HEADSHOT_MULTIPLIER,
-            MAX_HEADSHOT_MULTIPLIER);
+        WeaponData.HeadshotMultiplier =
+            FMath::Clamp(WeaponData.HeadshotMultiplier, MIN_HEADSHOT_MULTIPLIER, MAX_HEADSHOT_MULTIPLIER);
     }
 
     UE_LOG(LogBaseWeapon, Log, TEXT("Weapon initialized successfully"));
@@ -244,12 +233,7 @@ void ASTUBaseWeapon::PerformLineTrace(const FVector& TraceStart, const FVector& 
     QueryParams.bTraceComplex = false; // Оптимизация для лучшей производительности
 
     GetWorld()->LineTraceSingleByChannel(
-        HitResult,
-        TraceStart,
-        TraceEnd,
-        ECollisionChannel::ECC_Visibility,
-        QueryParams
-        );
+        HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
 }
 
 void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart,
@@ -262,29 +246,18 @@ void ASTUBaseWeapon::DrawDebugTrace(const FVector& TraceStart,
     }
 
     // Отрисовка линии трейсинга
-    DrawDebugLine(
-        GetWorld(),
-        TraceStart,
-        TraceEnd,
-        FColor::Red,
-        false,
-        DebugData.DebugTraceDuration,
-        0,
-        3.0f
-        );
+    DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, DebugData.DebugTraceDuration, 0, 3.0f);
 
     // Если попали в цель, рисуем сферу в точке попадания
     if (HitResult.bBlockingHit)
     {
-        DrawDebugSphere(
-            GetWorld(),
+        DrawDebugSphere(GetWorld(),
             HitResult.ImpactPoint,
             DebugData.DebugHitSphereRadius,
             24,
             FColor::Red,
             false,
-            DebugData.DebugTraceDuration
-            );
+            DebugData.DebugTraceDuration);
     }
 }
 
@@ -309,13 +282,7 @@ float ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitR
 
     // Использование компонента урона для нанесения урона
     const bool bDamageDealt = DamageComponent->DealDamage(
-        Target,
-        FinalDamage,
-        WeaponData.DamageType,
-        HitResult.ImpactPoint,
-        HitResult.BoneName,
-        bIsHeadshot
-        );
+        Target, FinalDamage, WeaponData.DamageType, HitResult.ImpactPoint, HitResult.BoneName, bIsHeadshot);
 
     if (bDamageDealt)
     {

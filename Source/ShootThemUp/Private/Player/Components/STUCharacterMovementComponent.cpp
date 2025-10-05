@@ -1,6 +1,5 @@
 // Игра ShootThemUp. Все права защищены.
 
-
 #include "Player/Components/STUCharacterMovementComponent.h"
 #include "Player/STUBaseCharacter.h"
 

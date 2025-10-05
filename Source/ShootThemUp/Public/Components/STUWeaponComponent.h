@@ -13,7 +13,7 @@ class ASTUBaseWeapon;
  * Отвечает за создание и управление экземпляром оружия.
  */
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -38,11 +38,11 @@ private:
 
 protected:
     /** Класс оружия для создания */
-    UPROPERTY(EditDefaultsOnly, Category="Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TSubclassOf<ASTUBaseWeapon> WeaponClass;
 
     /** Имя точки прикрепления оружия */
-    UPROPERTY(EditDefaultsOnly, Category="Weapon")
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponAttachPointName = "WeaponSocket";
 
 private:

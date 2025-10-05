@@ -33,11 +33,11 @@ protected:
 
 public:
     /** Возвращает true, если персонаж в данный момент бежит */
-    UFUNCTION(BlueprintCallable, Category="Movement")
+    UFUNCTION(BlueprintCallable, Category = "Movement")
     bool IsRunning() const;
 
     /** Возвращает угол направления движения в градусах */
-    UFUNCTION(BlueprintCallable, Category="Movement")
+    UFUNCTION(BlueprintCallable, Category = "Movement")
     float GetMovementDirection() const;
 
 private:
@@ -57,34 +57,34 @@ private:
 
 protected:
     // Компоненты камеры и движения
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USpringArmComponent* SpringArmComponent;
 
     // Компоненты системы здоровья
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USTUHealthComponent* HealthComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UTextRenderComponent* HealthTextComponent;
 
     // Компонент системы оружия
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USTUWeaponComponent* WeaponComponent;
 
     // Настройки анимации
-    UPROPERTY(EditDefaultsOnly, Category="Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
 
     // Настройки урона от приземления
     UPROPERTY(EditDefaultsOnly,
-        Category="Movement",
-        meta=(ToolTip="Velocity range for landing damage calculation (min, max)"))
+        Category = "Movement",
+        meta = (ToolTip = "Velocity range for landing damage calculation (min, max)"))
     FVector2D LandedDamageVelocity{ FVector2D(900.f, 1200.f) };
 
-    UPROPERTY(EditDefaultsOnly, Category="Movement", meta=(ToolTip="Damage range for landing damage (min, max)"))
+    UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (ToolTip = "Damage range for landing damage (min, max)"))
     FVector2D LandedDamage{ FVector2D(10.f, 100.f) };
 
 private:

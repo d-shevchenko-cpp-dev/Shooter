@@ -13,7 +13,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
  * Компонент здоровья, который управляет здоровьем персонажа, уроном и функциональностью автоматического лечения.
  * Предоставляет события для изменений здоровья и состояния смерти.
  */
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
 {
     GENERATED_BODY()
@@ -25,35 +25,35 @@ public:
      * Получает текущее значение здоровья.
      * @return Текущее количество здоровья
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealth() const;
 
     /**
      * Получает максимальное значение здоровья.
      * @return Максимальное количество здоровья
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     float GetMaxHealth() const { return MaxHealth; }
 
     /**
      * Получает процент здоровья (от 0.0 до 1.0).
      * @return Процент здоровья
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const;
 
     /**
      * Проверяет, мертв ли персонаж (здоровье <= 0).
      * @return True если мертв, false в противном случае
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const;
 
     /**
      * Проверяет, находится ли персонаж на полном здоровье.
      * @return True если на полном здоровье, false в противном случае
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsFullHealth() const;
 
     /**
@@ -61,7 +61,7 @@ public:
      * @param HealAmount Количество здоровья для добавления
      * @return True если здоровье было добавлено, false если уже на максимальном здоровье
      */
-    UFUNCTION(BlueprintCallable, Category="Health")
+    UFUNCTION(BlueprintCallable, Category = "Health")
     bool AddHealth(float HealAmount);
 
     /**
@@ -116,38 +116,44 @@ protected:
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
         Category = "Health",
-        meta=(ClampMin = 1.f, ClampMax = 10000.f, ToolTip="Maximum health value"))
+        meta = (ClampMin = 1.f, ClampMax = 10000.f, ToolTip = "Maximum health value"))
     float MaxHealth{ 100.f };
 
     /** Включено ли автоматическое лечение */
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
         Category = "Heal",
-        meta=(ToolTip="Enable automatic health regeneration"))
+        meta = (ToolTip = "Enable automatic health regeneration"))
     bool AutoHeal{ true };
 
     /** Временной интервал между обновлениями лечения */
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
         Category = "Heal",
-        meta=(EditCondition = "AutoHeal", ClampMin = 0.1f, ClampMax = 10.f,
-            ToolTip="Time interval between each heal update"))
+        meta = (EditCondition = "AutoHeal",
+            ClampMin = 0.1f,
+            ClampMax = 10.f,
+            ToolTip = "Time interval between each heal update"))
     float HealUpdateTime{ 0.3f };
 
     /** Задержка перед началом автоматического лечения после получения урона */
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
         Category = "Heal",
-        meta=(EditCondition = "AutoHeal", ClampMin = 0.f, ClampMax = 60.f,
-            ToolTip="Delay before auto-healing starts after taking damage"))
+        meta = (EditCondition = "AutoHeal",
+            ClampMin = 0.f,
+            ClampMax = 60.f,
+            ToolTip = "Delay before auto-healing starts after taking damage"))
     float HealDelay{ 3.f };
 
     /** Количество здоровья, восстанавливаемого за одно обновление лечения */
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
         Category = "Heal",
-        meta=(EditCondition = "AutoHeal", ClampMin = 0.1f, ClampMax = 100.f,
-            ToolTip="Amount of health restored per heal update"))
+        meta = (EditCondition = "AutoHeal",
+            ClampMin = 0.1f,
+            ClampMax = 100.f,
+            ToolTip = "Amount of health restored per heal update"))
     float HealModifier{ 1.f };
 
 private:

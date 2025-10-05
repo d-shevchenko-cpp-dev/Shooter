@@ -1,6 +1,5 @@
 // Игра ShootThemUp. Все права защищены.
 
-
 #include "STUGameModeBase.h"
 
 #include "STUGameHUD.h"
