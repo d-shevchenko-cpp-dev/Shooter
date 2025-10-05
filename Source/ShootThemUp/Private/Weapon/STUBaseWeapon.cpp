@@ -4,6 +4,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/STUDamageComponent.h"
 #include "Player/Components/STUHealthComponent.h"
+#include "Weapon/STUWeaponDebugManager.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
@@ -22,6 +23,9 @@ ASTUBaseWeapon::ASTUBaseWeapon()
     RootComponent = WeaponMesh;
 
     DamageComponent = CreateDefaultSubobject<USTUDamageComponent>(TEXT("DamageComponent"));
+
+    // Создание менеджера отладки
+    DebugManager = CreateDefaultSubobject<USTUWeaponDebugManager>(TEXT("DebugManager"));
 
     // Инициализация данных оружия значениями по умолчанию
     WeaponData = FSTUWeaponData();
@@ -72,6 +76,14 @@ void ASTUBaseWeapon::BeginPlay()
     // Валидация компонентов
     checkf(WeaponMesh, TEXT("WeaponMesh component is not valid"));
     checkf(DamageComponent, TEXT("DamageComponent is not valid"));
+    checkf(DebugManager, TEXT("DebugManager is not valid"));
+
+    // Инициализация менеджера отладки
+    FSTUWeaponDebugSettings DebugSettings;
+    DebugSettings.bEnableDebug = DebugData.bDrawDebugTrace;
+    DebugSettings.DebugDuration = DebugData.DebugTraceDuration;
+    DebugSettings.HitSphereRadius = DebugData.DebugHitSphereRadius;
+    DebugManager->Initialize(DebugSettings);
 
     // Валидация данных оружия
     if (WeaponData.ShotDelay < MIN_SHOT_DELAY || WeaponData.ShotDelay > MAX_SHOT_DELAY)
@@ -133,18 +145,29 @@ void ASTUBaseWeapon::MakeShot()
     // Определение точек трейсинга
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
-    const FVector BaseDirection = CameraRotation.Vector();
-    const FVector ShootDirection = GetShootDirection(BaseDirection);
-    const FVector TraceEnd = TraceStart + ShootDirection * WeaponData.MaxRange;
+    
+    // Вычисляем направление от позиции оружия к точке, куда смотрит камера
+    const FVector CameraDirection = CameraRotation.Vector();
+    const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
+    const FVector ShootDirection = (TargetPoint - TraceStart).GetSafeNormal();
+    const FVector FinalShootDirection = GetShootDirection(ShootDirection);
+    const FVector TraceEnd = TraceStart + FinalShootDirection * WeaponData.MaxRange;
 
     // Выполнение линейного трейсинга
     FHitResult HitResult;
     PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
-    // Отображение отладочной информации
-    if (DebugData.bDrawDebugTrace)
+    // Отображение отладочной информации через менеджер
+    if (DebugManager)
     {
-        DrawDebugTrace(TraceStart, TraceEnd, HitResult);
+        DebugManager->DrawTraceLine(GetWorld(), TraceStart, TraceEnd);
+        DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
+        DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
+        
+        if (HitResult.bBlockingHit)
+        {
+            DebugManager->DrawHitSphere(GetWorld(), HitResult.ImpactPoint);
+        }
     }
 
     // Обработка результата попадания и применение урона
@@ -359,5 +382,29 @@ float ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitR
     {
         UE_LOG(LogBaseWeapon, Warning, TEXT("Failed to deal damage to %s"), *Target->GetName());
         return 0.0f;
+    }
+}
+
+void ASTUBaseWeapon::SetDebugEnabledForCategory(ESTUWeaponDebugCategory Category, bool bEnabled)
+{
+    if (DebugManager)
+    {
+        DebugManager->SetDebugEnabledForCategory(Category, bEnabled);
+    }
+}
+
+void ASTUBaseWeapon::SetDebugEnabled(bool bEnabled)
+{
+    if (DebugManager)
+    {
+        DebugManager->SetDebugEnabled(bEnabled);
+    }
+}
+
+void ASTUBaseWeapon::UpdateDebugSettings(const FSTUWeaponDebugSettings& Settings)
+{
+    if (DebugManager)
+    {
+        DebugManager->UpdateDebugSettings(Settings);
     }
 }

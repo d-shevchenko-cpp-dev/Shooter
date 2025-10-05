@@ -1,0 +1,41 @@
+// Игра ShootThemUp. Все права защищены.
+
+/*
+ * Пример использования нового API отладки оружия
+ * 
+ * Этот файл демонстрирует, как использовать новый менеджер отладки
+ * для управления отладочной информацией из блюпринтов.
+ */
+
+// В блюпринте персонажа или игрового режима:
+
+// 1. Получить оружие
+// ASTUBaseWeapon* Weapon = GetCurrentWeapon();
+
+// 2. Включить/выключить всю отладку
+// Weapon->SetDebugEnabled(true);
+
+// 3. Включить/выключить конкретные категории
+// Weapon->SetDebugEnabledForCategory(ESTUWeaponDebugCategory::Trace, true);
+// Weapon->SetDebugEnabledForCategory(ESTUWeaponDebugCategory::Hit, false);
+// Weapon->SetDebugEnabledForCategory(ESTUWeaponDebugCategory::Camera, true);
+// Weapon->SetDebugEnabledForCategory(ESTUWeaponDebugCategory::Spread, false);
+
+// 4. Обновить настройки отладки
+// FSTUWeaponDebugSettings NewSettings;
+// NewSettings.bEnableDebug = true;
+// NewSettings.DebugCategories = static_cast<int32>(ESTUWeaponDebugCategory::Trace | ESTUWeaponDebugCategory::Hit);
+// NewSettings.DebugDuration = 5.0f;
+// NewSettings.TraceLineThickness = 5.0f;
+// NewSettings.HitSphereRadius = 15.0f;
+// NewSettings.TraceLineColor = FColor::Green;
+// NewSettings.HitSphereColor = FColor::Yellow;
+// Weapon->UpdateDebugSettings(NewSettings);
+
+// 5. Получить менеджер отладки для прямого доступа
+// USTUWeaponDebugManager* DebugManager = Weapon->GetDebugManager();
+// if (DebugManager)
+// {
+//     DebugManager->SetDebugEnabled(true);
+//     DebugManager->SetDebugEnabledForCategory(ESTUWeaponDebugCategory::Trace, true);
+// }

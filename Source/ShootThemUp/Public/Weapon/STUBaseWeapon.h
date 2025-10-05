@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Weapon/STUWeaponDebugManager.h"
 #include "STUBaseWeapon.generated.h"
 
 class USkeletalMeshComponent;
@@ -139,6 +140,7 @@ struct SHOOTTHEMUP_API FSTUWeaponData
 /**
  * Структура данных для настроек отладки оружия.
  */
+// Устаревшая структура - используйте STUWeaponDebugManager вместо этого
 USTRUCT(BlueprintType)
 struct SHOOTTHEMUP_API FSTUWeaponDebugData
 {
@@ -225,6 +227,35 @@ public:
     UFUNCTION(BlueprintPure, Category = "Weapon")
     const FSTUWeaponDebugData& GetDebugData() const { return DebugData; }
 
+    /**
+     * Получает менеджер отладочной информации.
+     * @return Менеджер отладки
+     */
+    UFUNCTION(BlueprintPure, Category = "Weapon Debug")
+    USTUWeaponDebugManager* GetDebugManager() const { return DebugManager; }
+
+    /**
+     * Включает или выключает отладку для указанной категории.
+     * @param Category Категория отладки
+     * @param bEnabled Включить или выключить
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
+    void SetDebugEnabledForCategory(ESTUWeaponDebugCategory Category, bool bEnabled);
+
+    /**
+     * Включает или выключает всю отладку.
+     * @param bEnabled Включить или выключить
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
+    void SetDebugEnabled(bool bEnabled);
+
+    /**
+     * Обновляет настройки отладки.
+     * @param Settings Новые настройки отладки
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
+    void UpdateDebugSettings(const FSTUWeaponDebugSettings& Settings);
+
     /** Событие выстрела из оружия */
     UPROPERTY(BlueprintAssignable, Category = "Weapon Events")
     FOnWeaponShot OnWeaponShot;
@@ -305,6 +336,10 @@ protected:
     /** Компонент для нанесения урона */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USTUDamageComponent* DamageComponent;
+
+    /** Менеджер отладочной информации */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    USTUWeaponDebugManager* DebugManager;
 
     /** Имя сокета дула оружия */
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
