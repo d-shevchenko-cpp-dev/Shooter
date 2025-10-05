@@ -88,8 +88,11 @@ private:
      * @param DamageCauser Актор, который причинил урон
      */
     UFUNCTION()
-    void OnTakeAnyDamageHandle(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, 
-        class AController* InstigatedBy, AActor* DamageCauser);
+    void OnTakeAnyDamageHandle(AActor* DamagedActor,
+        float Damage,
+        const class UDamageType* DamageType,
+        class AController* InstigatedBy,
+        AActor* DamageCauser);
 
     /**
      * Обновляет здоровье во время процесса автоматического лечения.
@@ -110,39 +113,49 @@ private:
 
 protected:
     /** Максимальное значение здоровья */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", 
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Health",
         meta=(ClampMin = 1.f, ClampMax = 10000.f, ToolTip="Maximum health value"))
-    float MaxHealth {100.f};
+    float MaxHealth{ 100.f };
 
     /** Включено ли автоматическое лечение */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal",
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Heal",
         meta=(ToolTip="Enable automatic health regeneration"))
-    bool AutoHeal {true};
-    
+    bool AutoHeal{ true };
+
     /** Временной интервал между обновлениями лечения */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", 
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Heal",
         meta=(EditCondition = "AutoHeal", ClampMin = 0.1f, ClampMax = 10.f,
-        ToolTip="Time interval between each heal update"))
-    float HealUpdateTime {0.3f};
-    
+            ToolTip="Time interval between each heal update"))
+    float HealUpdateTime{ 0.3f };
+
     /** Задержка перед началом автоматического лечения после получения урона */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", 
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Heal",
         meta=(EditCondition = "AutoHeal", ClampMin = 0.f, ClampMax = 60.f,
-        ToolTip="Delay before auto-healing starts after taking damage"))
-    float HealDelay {3.f};
-    
+            ToolTip="Delay before auto-healing starts after taking damage"))
+    float HealDelay{ 3.f };
+
     /** Количество здоровья, восстанавливаемого за одно обновление лечения */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", 
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Heal",
         meta=(EditCondition = "AutoHeal", ClampMin = 0.1f, ClampMax = 100.f,
-        ToolTip="Amount of health restored per heal update"))
-    float HealModifier {1.f};
+            ToolTip="Amount of health restored per heal update"))
+    float HealModifier{ 1.f };
 
 private:
     /** Дескриптор таймера для автоматического лечения */
     FTimerHandle HealTimerHandle;
-    
+
     /** Текущее значение здоровья */
-    float Health {0.f};
+    float Health{ 0.f };
 
     /** Константы */
     static constexpr float MIN_HEALTH_THRESHOLD = 0.01f;

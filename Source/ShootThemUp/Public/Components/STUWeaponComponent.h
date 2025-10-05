@@ -48,5 +48,4 @@ protected:
 private:
     /** Текущее оружие */
     ASTUBaseWeapon* CurrentWeapon;
-
 };

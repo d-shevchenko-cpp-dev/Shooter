@@ -39,7 +39,7 @@ void USTUWeaponComponent::BeginPlay()
 void USTUWeaponComponent::SpawnWeapon()
 {
     auto Character = Cast<ACharacter>(GetOwner());
-    
+
     if (!Character || !GetWorld())
     {
         return;
@@ -50,7 +50,7 @@ void USTUWeaponComponent::SpawnWeapon()
     {
         return;
     }
-    
+
     FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
     CurrentWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, WeaponAttachPointName);
     CurrentWeapon->SetOwner(Character);

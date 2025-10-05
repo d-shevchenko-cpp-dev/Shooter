@@ -50,7 +50,7 @@ private:
     // Обработчики здоровья и смерти
     void OnDeath();
     void OnHealthChanged(float Health);
-    
+
     // Обработчик урона от приземления
     UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);
@@ -79,16 +79,18 @@ protected:
     UAnimMontage* DeathAnimMontage;
 
     // Настройки урона от приземления
-    UPROPERTY(EditDefaultsOnly, Category="Movement", meta=(ToolTip="Velocity range for landing damage calculation (min, max)"))
-    FVector2D LandedDamageVelocity{FVector2D(900.f, 1200.f)};
+    UPROPERTY(EditDefaultsOnly,
+        Category="Movement",
+        meta=(ToolTip="Velocity range for landing damage calculation (min, max)"))
+    FVector2D LandedDamageVelocity{ FVector2D(900.f, 1200.f) };
 
     UPROPERTY(EditDefaultsOnly, Category="Movement", meta=(ToolTip="Damage range for landing damage (min, max)"))
-    FVector2D LandedDamage{FVector2D(10.f, 100.f)};
+    FVector2D LandedDamage{ FVector2D(10.f, 100.f) };
 
 private:
     // Флаги состояния движения
-    bool IsCharacterRunning{false};
-    bool IsCharacterMoving{false};
+    bool IsCharacterRunning{ false };
+    bool IsCharacterMoving{ false };
 
     // Константы
     static constexpr float DEATH_LIFESPAN = 5.0f;

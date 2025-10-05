@@ -28,16 +28,16 @@ public:
     USceneComponent* SceneComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Radius{300.0f};
+    float Radius{ 300.0f };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FColor SphereColor{FColor::Red};
+    FColor SphereColor{ FColor::Red };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float Damage{10.0f};
+    float Damage{ 10.0f };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool DoFullDamage{false};
+    bool DoFullDamage{ false };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UDamageType> DamageType;

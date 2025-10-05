@@ -14,7 +14,8 @@
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacter, All, All);
 
 ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer.SetDefaultSubobjectClass<USTUCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+    : Super(ObjectInitializer.SetDefaultSubobjectClass<USTUCharacterMovementComponent>(
+        ACharacter::CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
 
@@ -52,7 +53,7 @@ void ASTUBaseCharacter::BeginPlay()
     // Инициализация отображения здоровья
     check(HealthComponent);
     OnHealthChanged(HealthComponent->GetHealth());
-    
+
     // Привязка событий компонента здоровья
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
@@ -75,7 +76,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     // Привязки ввода движения
     PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
-    
+
     // Привязки ввода камеры
     PlayerInputComponent->BindAxis("LookUp", this, &ASTUBaseCharacter::AddControllerPitchInput);
     PlayerInputComponent->BindAxis("TurnAround", this, &ASTUBaseCharacter::AddControllerYawInput);
@@ -84,7 +85,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
-    
+
     // Привязки оружия
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::StartShooting);
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopShooting);
@@ -176,4 +177,3 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
-

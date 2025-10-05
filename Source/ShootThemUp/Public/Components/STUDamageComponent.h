@@ -29,10 +29,12 @@ public:
      * @return True если урон был успешно нанесен
      */
     UFUNCTION(BlueprintCallable, Category="Damage")
-    bool DealDamage(AActor* Target, float DamageAmount, TSubclassOf<UDamageType> DamageType,
-                   const FVector& HitLocation = FVector::ZeroVector, 
-                   const FName& HitBoneName = NAME_None, 
-                   bool bIsHeadshot = false);
+    bool DealDamage(AActor* Target,
+        float DamageAmount,
+        TSubclassOf<UDamageType> DamageType,
+        const FVector& HitLocation = FVector::ZeroVector,
+        const FName& HitBoneName = NAME_None,
+        bool bIsHeadshot = false);
 
 protected:
     virtual void BeginPlay() override;
@@ -48,8 +50,12 @@ private:
      * @param bIsHeadshot Является ли это headshot'ом
      * @return True если урон был применен
      */
-    bool ApplyDamageInternal(AActor* Target, float DamageAmount, TSubclassOf<UDamageType> DamageType,
-                           const FVector& HitLocation, const FName& HitBoneName, bool bIsHeadshot);
+    bool ApplyDamageInternal(AActor* Target,
+        float DamageAmount,
+        TSubclassOf<UDamageType> DamageType,
+        const FVector& HitLocation,
+        const FName& HitBoneName,
+        bool bIsHeadshot);
 
     /**
      * Получает контроллер, который владеет этим компонентом.

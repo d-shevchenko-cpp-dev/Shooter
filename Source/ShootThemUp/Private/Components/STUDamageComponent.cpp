@@ -18,8 +18,12 @@ void USTUDamageComponent::BeginPlay()
     Super::BeginPlay();
 }
 
-bool USTUDamageComponent::DealDamage(AActor* Target, float DamageAmount, TSubclassOf<UDamageType> DamageType,
-                                   const FVector& HitLocation, const FName& HitBoneName, bool bIsHeadshot)
+bool USTUDamageComponent::DealDamage(AActor* Target,
+    float DamageAmount,
+    TSubclassOf<UDamageType> DamageType,
+    const FVector& HitLocation,
+    const FName& HitBoneName,
+    bool bIsHeadshot)
 {
     if (!Target || DamageAmount <= 0.0f)
     {
@@ -29,8 +33,12 @@ bool USTUDamageComponent::DealDamage(AActor* Target, float DamageAmount, TSubcla
     return ApplyDamageInternal(Target, DamageAmount, DamageType, HitLocation, HitBoneName, bIsHeadshot);
 }
 
-bool USTUDamageComponent::ApplyDamageInternal(AActor* Target, float DamageAmount, TSubclassOf<UDamageType> DamageType,
-                                            const FVector& HitLocation, const FName& HitBoneName, bool bIsHeadshot)
+bool USTUDamageComponent::ApplyDamageInternal(AActor* Target,
+    float DamageAmount,
+    TSubclassOf<UDamageType> DamageType,
+    const FVector& HitLocation,
+    const FName& HitBoneName,
+    bool bIsHeadshot)
 {
     if (!Target || !GetWorld())
     {
@@ -49,16 +57,24 @@ bool USTUDamageComponent::ApplyDamageInternal(AActor* Target, float DamageAmount
 
     // Применение точечного урона с использованием системы урона Unreal
     UGameplayStatics::ApplyPointDamage(
-        Target,                          // Target actor
-        DamageAmount,                   // Damage amount
-        HitResult.ImpactNormal,          // Damage direction
-        HitResult,                      // Hit result
-        InstigatorController,            // Instigator controller
-        GetOwner(),                     // Damage causer
-        DamageType                      // Damage type
-    );
+        Target,
+        // Target actor
+        DamageAmount,
+        // Damage amount
+        HitResult.ImpactNormal,
+        // Damage direction
+        HitResult,
+        // Hit result
+        InstigatorController,
+        // Instigator controller
+        GetOwner(),
+        // Damage causer
+        DamageType // Damage type
+        );
 
-    UE_LOG(LogDamageComponent, Log, TEXT("Dealt %f damage to %s%s"), 
+    UE_LOG(LogDamageComponent,
+        Log,
+        TEXT("Dealt %f damage to %s%s"),
         DamageAmount,
         Target ? *Target->GetName() : TEXT("Unknown"),
         bIsHeadshot ? TEXT(" (HEADSHOT)") : TEXT(""));
@@ -72,6 +88,6 @@ AController* USTUDamageComponent::GetInstigatorController() const
     {
         return OwnerCharacter->GetController();
     }
-    
+
     return nullptr;
 }
