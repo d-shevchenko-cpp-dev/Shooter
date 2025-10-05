@@ -2,8 +2,6 @@
 
 #include "Weapon/STULauncherWeapon.h"
 #include "Weapon/STUProjectile.h"
-#include "kismet/GameplayStatics.h"
-#include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
 
@@ -48,21 +46,33 @@ void ASTULauncherWeapon::MakeShot()
         return;
     }
 
-    UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - placeholder implementation"));
+    UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - using trajectory points"));
 
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
-    const FVector SocketLocation = SocketTransform.GetLocation();
+    // Получение точек траектории выстрела
+    FVector TraceStart, TraceEnd;
+    if (!GetShotTrajectoryPoints(TraceStart, TraceEnd))
+    {
+        UE_LOG(LogLauncherWeapon, Error, TEXT("Failed to get shot trajectory points"));
+        return;
+    }
 
-    const FTransform SpawnTransform(FRotator::ZeroRotator, SocketLocation);
-    auto Projectile = UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(), ProjectileClass, SpawnTransform);
-    // set projectile params
-    UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
+    // Вычисляем направление запуска снаряда
+    const FVector LaunchDirection = (TraceEnd - TraceStart).GetSafeNormal();
+    const FRotator LaunchRotation = LaunchDirection.Rotation();
+
+    // Создаем снаряд в позиции дула с правильным направлением
+    const FTransform SpawnTransform(LaunchRotation, TraceStart);
+    auto Projectile = GetWorld()->SpawnActorDeferred<ASTUProjectile>(ProjectileClass, SpawnTransform);
+    if (Projectile)
+    {
+        Projectile->SetShootDirection(LaunchDirection);
+        Projectile->FinishSpawning(SpawnTransform);
+    }
 
     // TODO: В будущем здесь будет реализация:
-    // 1. Создание снаряда (гранаты/ракеты)
-    // 2. Установка параметров запуска (сила, направление, гравитация)
-    // 3. Запуск снаряда в направлении цели
-    // 4. Обработка событий попадания/промаха
+    // 1. Передача направления и силы снаряду
+    // 2. Установка параметров запуска (сила, гравитация)
+    // 3. Обработка событий попадания/промаха
 
     // Временная заглушка - создаем пустой результат попадания
     FHitResult EmptyHitResult;

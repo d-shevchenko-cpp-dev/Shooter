@@ -311,3 +311,40 @@ void ASTUBaseWeapon::StopAutomaticFire()
 {
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
+
+bool ASTUBaseWeapon::GetShotTrajectoryPoints(FVector& TraceStart, FVector& TraceEnd) const
+{
+    // Получение владельца оружия
+    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    if (!OwnerCharacter)
+    {
+        UE_LOG(LogBaseWeapon, Error, TEXT("Owner is not a Character"));
+        return false;
+    }
+
+    // Получение контроллера игрока
+    const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
+    if (!PlayerController)
+    {
+        UE_LOG(LogBaseWeapon, Error, TEXT("PlayerController is not valid"));
+        return false;
+    }
+
+    // Получение позиции и направления камеры
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+    // Определение начальной точки трейсинга (позиция сокета дула)
+    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
+    TraceStart = SocketTransform.GetLocation();
+
+    // Вычисляем направление от позиции оружия к точке, куда смотрит камера
+    const FVector CameraDirection = CameraRotation.Vector();
+    const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
+    const FVector ShootDirection = (TargetPoint - TraceStart).GetSafeNormal();
+    const FVector FinalShootDirection = GetShootDirection(ShootDirection);
+    TraceEnd = TraceStart + FinalShootDirection * WeaponData.MaxRange;
+
+    return true;
+}

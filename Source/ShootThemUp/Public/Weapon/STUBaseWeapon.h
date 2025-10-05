@@ -321,6 +321,15 @@ protected:
     virtual FVector GetShootDirection(const FVector& BaseDirection) const;
 
     /**
+     * Получает начальную и конечную точки траектории выстрела.
+     * @param TraceStart Начальная точка трейсинга (выход)
+     * @param TraceEnd Конечная точка трейсинга (выход)
+     * @return True если точки успешно получены, False в случае ошибки
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual bool GetShotTrajectoryPoints(FVector& TraceStart, FVector& TraceEnd) const;
+
+    /**
      * Определяет, является ли попадание headshot'ом.
      * @param HitBoneName Имя пораженной кости
      * @return True если это headshot

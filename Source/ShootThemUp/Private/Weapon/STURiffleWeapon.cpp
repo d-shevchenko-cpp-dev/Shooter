@@ -53,48 +53,40 @@ void ASTURiffleWeapon::MakeShot()
         return;
     }
 
-    // Получение владельца оружия
-    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (!OwnerCharacter)
+    // Получение точек траектории выстрела
+    FVector TraceStart, TraceEnd;
+    if (!GetShotTrajectoryPoints(TraceStart, TraceEnd))
     {
-        UE_LOG(LogRiffleWeapon, Error, TEXT("Owner is not a Character"));
+        UE_LOG(LogRiffleWeapon, Error, TEXT("Failed to get shot trajectory points"));
         return;
     }
-
-    // Получение контроллера игрока
-    const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
-    if (!PlayerController)
-    {
-        UE_LOG(LogRiffleWeapon, Error, TEXT("PlayerController is not valid"));
-        return;
-    }
-
-    // Получение позиции и направления камеры
-    FVector CameraLocation;
-    FRotator CameraRotation;
-    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-    // Определение точек трейсинга
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
-    const FVector TraceStart = SocketTransform.GetLocation();
-
-    // Вычисляем направление от позиции оружия к точке, куда смотрит камера
-    const FVector CameraDirection = CameraRotation.Vector();
-    const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
-    const FVector ShootDirection = (TargetPoint - TraceStart).GetSafeNormal();
-    const FVector FinalShootDirection = GetShootDirection(ShootDirection);
-    const FVector TraceEnd = TraceStart + FinalShootDirection * WeaponData.MaxRange;
 
     // Выполнение линейного трейсинга
     FHitResult HitResult;
     PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
+    // Получение позиции камеры для отладочной информации
+    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    const APlayerController* PlayerController =
+        OwnerCharacter ? OwnerCharacter->GetController<APlayerController>() : nullptr;
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    if (PlayerController)
+    {
+        PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+    }
+
     // Отображение отладочной информации через менеджер
     if (DebugManager)
     {
         DebugManager->DrawTraceLine(GetWorld(), TraceStart, TraceEnd);
-        DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
-        DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
+        if (PlayerController)
+        {
+            const FVector CameraDirection = CameraRotation.Vector();
+            const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
+            DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
+            DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
+        }
 
         if (HitResult.bBlockingHit)
         {
