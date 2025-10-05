@@ -136,6 +136,12 @@ void ASTUBaseCharacter::OnDeath()
 {
     UE_LOG(BaseCharacter, All, TEXT("Player %s is dead"), *GetName());
 
+    // Остановка стрельбы при смерти
+    if (WeaponComponent)
+    {
+        WeaponComponent->StopShooting();
+    }
+
     // Воспроизведение анимации смерти, если доступна
     if (DeathAnimMontage)
     {

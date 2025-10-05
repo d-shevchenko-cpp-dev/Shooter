@@ -3,6 +3,7 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/STUDamageComponent.h"
+#include "Player/Components/STUHealthComponent.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
@@ -193,6 +194,16 @@ bool ASTUBaseWeapon::IsValidForShooting() const
     {
         UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is not a Character"));
         return false;
+    }
+
+    // Проверяем, не мертв ли владелец оружия
+    if (const auto* HealthComponent = OwnerCharacter->FindComponentByClass<USTUHealthComponent>())
+    {
+        if (HealthComponent->IsDead())
+        {
+            UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is dead, cannot shoot"));
+            return false;
+        }
     }
 
     const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
