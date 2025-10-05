@@ -65,6 +65,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "0.01", ClampMax = "12.0"))
     float ShotDelay { 0.1f };
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "0.01", ClampMax = "12.0"))
+    float BulletSpread { 1.5f };
+
 
 private:
     FTimerHandle ShotTimerHandle;

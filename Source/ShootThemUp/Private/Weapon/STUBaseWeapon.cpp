@@ -69,7 +69,8 @@ void ASTUBaseWeapon::MakeShot()
     // Определение точек трейсинга
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
-    const auto ShootDirection = CameraRotation.Vector();
+    const auto HalfRad = FMath::DegreesToRadians(BulletSpread);
+    const auto ShootDirection = FMath::VRandCone(CameraRotation.Vector(), HalfRad);
     const FVector TraceEnd = CameraLocation + ShootDirection * MaxRange;
 
     // Выполнение линейного трейсинга
