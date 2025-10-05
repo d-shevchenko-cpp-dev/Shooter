@@ -18,6 +18,7 @@ public:
     ASTUBaseWeapon();
 
     virtual void Fire();
+    virtual void StopFire();
 
 protected:
     virtual void BeginPlay() override;
@@ -34,7 +35,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
     FName MuzzleSocketName { "MuzzleSocket" };
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "100.0", ClampMax = "10000.0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "100.0", ClampMax = "1000000.0"))
     float MaxRange { 2000.0f };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
@@ -60,6 +61,13 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
     FName NeckBoneName { "b_Neck" };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (ClampMin = "0.01", ClampMax = "12.0"))
+    float ShotDelay { 0.1f };
+
+
+private:
+    FTimerHandle ShotTimerHandle;
 
 private:
     void PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const;

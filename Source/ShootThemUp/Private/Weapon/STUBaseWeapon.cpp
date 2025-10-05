@@ -25,6 +25,12 @@ void ASTUBaseWeapon::Fire()
     UE_LOG(LogBaseWeapon, Display, TEXT("Fire"));
 
     MakeShot();
+    GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, ShotDelay, true);
+}
+
+void ASTUBaseWeapon::StopFire()
+{
+    GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
 // Вызывается при запуске игры или при появлении
@@ -63,7 +69,8 @@ void ASTUBaseWeapon::MakeShot()
     // Определение точек трейсинга
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
     const FVector TraceStart = SocketTransform.GetLocation();
-    const FVector TraceEnd = CameraLocation + CameraRotation.Vector() * MaxRange;
+    const auto ShootDirection = CameraRotation.Vector();
+    const FVector TraceEnd = CameraLocation + ShootDirection * MaxRange;
 
     // Выполнение линейного трейсинга
     FHitResult HitResult;

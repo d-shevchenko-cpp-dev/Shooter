@@ -24,7 +24,8 @@ public:
     /**
      * Производит выстрел из текущего оружия.
      */
-    void Fire();
+    void StartShooting();
+    void StopShooting();
 
 protected:
     virtual void BeginPlay() override;
