@@ -2,6 +2,7 @@
 
 #include "Weapon/STULauncherWeapon.h"
 #include "Weapon/STUProjectile.h"
+#include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
 
@@ -46,7 +47,13 @@ void ASTULauncherWeapon::MakeShot()
         return;
     }
 
-    UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - using trajectory points"));
+    if (!ProjectileClass)
+    {
+        UE_LOG(LogLauncherWeapon, Error, TEXT("Projectile class is not set"));
+        return;
+    }
+
+    UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - creating projectile"));
 
     // Получение точек траектории выстрела
     FVector TraceStart, TraceEnd;
@@ -56,6 +63,16 @@ void ASTULauncherWeapon::MakeShot()
         return;
     }
 
+    // Создание и запуск снаряда
+    LaunchProjectile(TraceStart, TraceEnd);
+
+    // Создаем пустой результат попадания для события
+    FHitResult EmptyHitResult;
+    OnWeaponShot.Broadcast(EmptyHitResult, 0.0f, false);
+}
+
+void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd)
+{
     // Вычисляем направление запуска снаряда
     const FVector LaunchDirection = (TraceEnd - TraceStart).GetSafeNormal();
     const FRotator LaunchRotation = LaunchDirection.Rotation();
@@ -63,19 +80,17 @@ void ASTULauncherWeapon::MakeShot()
     // Создаем снаряд в позиции дула с правильным направлением
     const FTransform SpawnTransform(LaunchRotation, TraceStart);
     auto Projectile = GetWorld()->SpawnActorDeferred<ASTUProjectile>(ProjectileClass, SpawnTransform);
+
     if (Projectile)
     {
         Projectile->SetShootDirection(LaunchDirection);
         Projectile->SetOwner(GetOwner());
         Projectile->FinishSpawning(SpawnTransform);
+
+        UE_LOG(LogLauncherWeapon, Log, TEXT("Projectile launched successfully"));
     }
-
-    // TODO: В будущем здесь будет реализация:
-    // 1. Передача направления и силы снаряду
-    // 2. Установка параметров запуска (сила, гравитация)
-    // 3. Обработка событий попадания/промаха
-
-    // Временная заглушка - создаем пустой результат попадания
-    FHitResult EmptyHitResult;
-    OnWeaponShot.Broadcast(EmptyHitResult, 0.0f, false);
+    else
+    {
+        UE_LOG(LogLauncherWeapon, Error, TEXT("Failed to spawn projectile"));
+    }
 }

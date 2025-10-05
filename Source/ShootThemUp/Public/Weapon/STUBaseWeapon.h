@@ -7,12 +7,13 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Weapon/STUWeaponDebugManager.h"
+#include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "STUBaseWeapon.generated.h"
 
 class USkeletalMeshComponent;
 class USTUDamageComponent;
 class UDamageType;
+struct FHitResult;
 
 /**
  * Делегат для события выстрела из оружия.
@@ -39,142 +40,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireStopped);
 
 /**
- * Структура данных для настроек оружия.
- * Централизует все параметры оружия в одном месте.
- */
-USTRUCT(BlueprintType)
-struct SHOOTTHEMUP_API FSTUWeaponData
-{
-    GENERATED_BODY()
-
-    /** Максимальная дальность стрельбы */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ClampMin = "100.0", ClampMax = "1000000.0"))
-    float MaxRange = 2000.0f;
-
-    /** Задержка между выстрелами в секундах */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ClampMin = "0.01", ClampMax = "12.0"))
-    float ShotDelay = 0.1f;
-
-    /** Разброс пули в градусах */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ClampMin = "0.01", ClampMax = "12.0"))
-    float BulletSpread = 1.5f;
-
-    /** Количество урона */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ClampMin = "0.0", ClampMax = "1000.0"))
-    float DamageAmount = 10.0f;
-
-    /** Множитель урона для headshot */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ClampMin = "1.0", ClampMax = "10.0"))
-    float HeadshotMultiplier = 2.0f;
-
-    /** Имя кости головы для определения headshot */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
-    FName HeadBoneName = TEXT("b_head");
-
-    /** Имя кости шеи для определения headshot */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
-    FName NeckBoneName = TEXT("b_Neck");
-
-    /** Тип урона */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")
-    TSubclassOf<UDamageType> DamageType;
-
-    /** Включить влияние здоровья на разброс выстрелов */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (ToolTip = "Включить модификацию разброса на основе здоровья"))
-    bool bEnableHealthSpreadModifier = false;
-
-    /** Пороговое значение здоровья для начала увеличения разброса (в процентах от 0.0 до 1.0) */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (EditCondition = "bEnableHealthSpreadModifier",
-            ClampMin = "0.0",
-            ClampMax = "1.0",
-            ToolTip = "Порог здоровья, ниже которого начинает увеличиваться разброс"))
-    float HealthSpreadThreshold = 0.3f;
-
-    /** Максимальный множитель разброса при критически низком здоровье */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Weapon Settings",
-        meta = (EditCondition = "bEnableHealthSpreadModifier",
-            ClampMin = "1.0",
-            ClampMax = "10.0",
-            ToolTip = "Максимальный множитель разброса при критически низком здоровье"))
-    float MaxHealthSpreadMultiplier = 3.0f;
-
-    FSTUWeaponData()
-    {
-        MaxRange = 2000.0f;
-        ShotDelay = 0.1f;
-        BulletSpread = 1.5f;
-        DamageAmount = 10.0f;
-        HeadshotMultiplier = 2.0f;
-        HeadBoneName = TEXT("b_head");
-        NeckBoneName = TEXT("b_Neck");
-        DamageType = nullptr;
-        bEnableHealthSpreadModifier = false;
-        HealthSpreadThreshold = 0.3f;
-        MaxHealthSpreadMultiplier = 3.0f;
-    }
-};
-
-/**
- * Структура данных для настроек отладки оружия.
- */
-// Устаревшая структура - используйте STUWeaponDebugManager вместо этого
-USTRUCT(BlueprintType)
-struct SHOOTTHEMUP_API FSTUWeaponDebugData
-{
-    GENERATED_BODY()
-
-    /** Включить отрисовку отладочной информации */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings")
-    bool bDrawDebugTrace = true;
-
-    /** Длительность отображения отладочной информации */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Debug Settings",
-        meta = (EditCondition = "bDrawDebugTrace"))
-    float DebugTraceDuration = 3.0f;
-
-    /** Радиус сферы в точке попадания */
-    UPROPERTY(EditDefaultsOnly,
-        BlueprintReadWrite,
-        Category = "Debug Settings",
-        meta = (EditCondition = "bDrawDebugTrace"))
-    float DebugHitSphereRadius = 10.0f;
-
-    FSTUWeaponDebugData()
-    {
-        bDrawDebugTrace = true;
-        DebugTraceDuration = 3.0f;
-        DebugHitSphereRadius = 10.0f;
-    }
-};
-
-/**
  * Базовый класс для всех видов оружия в игре.
- * Предоставляет основную функциональность стрельбы, трейсинга и нанесения урона.
  */
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
@@ -182,14 +48,6 @@ class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
     GENERATED_BODY()
 
 public:
-    /** Константы для лучшей читаемости кода */
-    static constexpr float MIN_SHOT_DELAY = 0.01f;
-    static constexpr float MAX_SHOT_DELAY = 12.0f;
-    static constexpr float MIN_DAMAGE = 0.0f;
-    static constexpr float MAX_DAMAGE = 1000.0f;
-    static constexpr float MIN_HEADSHOT_MULTIPLIER = 1.0f;
-    static constexpr float MAX_HEADSHOT_MULTIPLIER = 10.0f;
-
     ASTUBaseWeapon();
 
     /**
@@ -214,47 +72,11 @@ public:
     virtual bool CanFire() const;
 
     /**
-     * Получает текущие данные оружия.
-     * @return Структура с данными оружия
+     * Получает текущую конфигурацию оружия.
+     * @return Конфигурация оружия
      */
     UFUNCTION(BlueprintPure, Category = "Weapon")
-    const FSTUWeaponData& GetWeaponData() const { return WeaponData; }
-
-    /**
-     * Получает данные отладки оружия.
-     * @return Структура с данными отладки
-     */
-    UFUNCTION(BlueprintPure, Category = "Weapon")
-    const FSTUWeaponDebugData& GetDebugData() const { return DebugData; }
-
-    /**
-     * Получает менеджер отладочной информации.
-     * @return Менеджер отладки
-     */
-    UFUNCTION(BlueprintPure, Category = "Weapon Debug")
-    USTUWeaponDebugManager* GetDebugManager() const { return DebugManager; }
-
-    /**
-     * Включает или выключает отладку для указанной категории.
-     * @param Category Категория отладки
-     * @param bEnabled Включить или выключить
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
-    void SetDebugEnabledForCategory(ESTUWeaponDebugCategory Category, bool bEnabled);
-
-    /**
-     * Включает или выключает всю отладку.
-     * @param bEnabled Включить или выключить
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
-    void SetDebugEnabled(bool bEnabled);
-
-    /**
-     * Обновляет настройки отладки.
-     * @param Settings Новые настройки отладки
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon Debug")
-    void UpdateDebugSettings(const FSTUWeaponDebugSettings& Settings);
+    const USTUWeaponConfiguration* GetWeaponConfiguration() const { return WeaponConfiguration; }
 
     /** Событие выстрела из оружия */
     UPROPERTY(BlueprintAssignable, Category = "Weapon Events")
@@ -279,65 +101,6 @@ protected:
     virtual void MakeShot() {}
 
     /**
-     * Выполняет линейный трейсинг от начальной до конечной точки.
-     * @param TraceStart Начальная точка трейсинга
-     * @param TraceEnd Конечная точка трейсинга
-     * @param HitResult Результат трейсинга
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const;
-
-    /**
-     * Отрисовывает отладочную информацию о трейсинге.
-     * @param TraceStart Начальная точка трейсинга
-     * @param TraceEnd Конечная точка трейсинга
-     * @param HitResult Результат трейсинга
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual void DrawDebugTrace(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const;
-
-    /**
-     * Применяет урон к цели на основе результата попадания.
-     * @param Target Целевой актор
-     * @param HitResult Результат попадания
-     * @return Количество нанесенного урона
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual float ApplyDamageToTarget(AActor* Target, const FHitResult& HitResult);
-
-    /**
-     * Проверяет валидность оружия для стрельбы.
-     * @return True если оружие готово к стрельбе
-     */
-    UFUNCTION(BlueprintPure, Category = "Weapon")
-    virtual bool IsValidForShooting() const;
-
-    /**
-     * Получает направление стрельбы с учетом разброса.
-     * @param BaseDirection Базовое направление стрельбы
-     * @return Направление стрельбы с разбросом
-     */
-    UFUNCTION(BlueprintPure, Category = "Weapon")
-    virtual FVector GetShootDirection(const FVector& BaseDirection) const;
-
-    /**
-     * Получает начальную и конечную точки траектории выстрела.
-     * @param TraceStart Начальная точка трейсинга (выход)
-     * @param TraceEnd Конечная точка трейсинга (выход)
-     * @return True если точки успешно получены, False в случае ошибки
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon")
-    virtual bool GetShotTrajectoryPoints(FVector& TraceStart, FVector& TraceEnd) const;
-
-    /**
-     * Определяет, является ли попадание headshot'ом.
-     * @param HitBoneName Имя пораженной кости
-     * @return True если это headshot
-     */
-    UFUNCTION(BlueprintPure, Category = "Weapon")
-    virtual bool IsHeadshot(const FName& HitBoneName) const;
-
-    /**
      * Выполняет автоматическую стрельбу с заданным интервалом.
      * Может быть переопределен в дочерних классах для кастомной логики автоматической стрельбы.
      */
@@ -351,6 +114,56 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Weapon")
     virtual void StopAutomaticFire();
 
+    /**
+     * Проверяет валидность оружия для стрельбы.
+     * @return True если оружие готово к стрельбе
+     */
+    UFUNCTION(BlueprintPure, Category = "Weapon")
+    virtual bool IsValidForShooting() const;
+
+    /**
+     * Получает начальную и конечную точки траектории выстрела.
+     * @param TraceStart Начальная точка трейсинга (выход)
+     * @param TraceEnd Конечная точка трейсинга (выход)
+     * @return True если точки успешно получены, False в случае ошибки
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual bool GetShotTrajectoryPoints(FVector& TraceStart, FVector& TraceEnd) const;
+
+    /**
+     * Выполняет линейный трейсинг от начальной до конечной точки.
+     * @param TraceStart Начальная точка трейсинга
+     * @param TraceEnd Конечная точка трейсинга
+     * @param HitResult Результат трейсинга
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const;
+
+    /**
+     * Применяет урон к цели на основе результата попадания.
+     * @param Target Целевой актор
+     * @param HitResult Результат попадания
+     * @return Количество нанесенного урона
+     */
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual float ApplyDamageToTarget(AActor* Target, const FHitResult& HitResult);
+
+    /**
+     * Определяет, является ли попадание headshot'ом.
+     * @param HitBoneName Имя пораженной кости
+     * @return True если это headshot
+     */
+    UFUNCTION(BlueprintPure, Category = "Weapon")
+    virtual bool IsHeadshot(const FName& HitBoneName) const;
+
+    /**
+     * Получает направление стрельбы с учетом разброса.
+     * @param BaseDirection Базовое направление стрельбы
+     * @return Направление стрельбы с разбросом
+     */
+    UFUNCTION(BlueprintPure, Category = "Weapon")
+    virtual FVector GetShootDirection(const FVector& BaseDirection) const;
+
 protected:
     /** Компонент меша оружия */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -360,21 +173,13 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USTUDamageComponent* DamageComponent;
 
-    /** Менеджер отладочной информации */
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-    USTUWeaponDebugManager* DebugManager;
+    /** Конфигурация оружия */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
+    USTUWeaponConfiguration* WeaponConfiguration;
 
     /** Имя сокета дула оружия */
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
     FName MuzzleSocketName = TEXT("MuzzleSocket");
-
-    /** Данные оружия */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
-    FSTUWeaponData WeaponData;
-
-    /** Данные отладки оружия */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Debug Settings", meta = (AllowPrivateAccess = "true"))
-    FSTUWeaponDebugData DebugData;
 
 private:
     /** Таймер для автоматической стрельбы */
@@ -384,14 +189,19 @@ private:
     mutable float CachedSpreadRadians = -1.0f;
 
     /**
-     * Получает кэшированное значение разброса в радианах.
+     * Получает кэшированное значение разброса в радианах с учетом здоровья.
      * @return Разброс в радианах
      */
     float GetCachedSpreadRadians() const;
 
     /**
-     * Получает множитель разброса на основе текущего здоровья владельца.
-     * @return Множитель разброса (1.0 = без изменений, >1.0 = увеличенный разброс)
+     * Инициализирует сервисы оружия.
      */
-    float GetHealthSpreadMultiplier() const;
+    void InitializeServices();
+
+    /**
+     * Валидирует компоненты оружия.
+     * @return True если все компоненты валидны
+     */
+    bool ValidateComponents() const;
 };

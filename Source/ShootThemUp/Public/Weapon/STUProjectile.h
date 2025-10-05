@@ -9,7 +9,10 @@
 class UProjectileMovementComponent;
 class USphereComponent;
 
-UCLASS()
+/**
+ * Класс снаряда для гранатомета.
+ */
+UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTUProjectile : public AActor
 {
     GENERATED_BODY()
@@ -17,12 +20,24 @@ class SHOOTTHEMUP_API ASTUProjectile : public AActor
 public:
     ASTUProjectile();
 
+    UFUNCTION(BlueprintCallable, Category = "Projectile")
     void SetShootDirection(const FVector& Direction);
+
+    UFUNCTION(BlueprintPure, Category = "Projectile")
+    AController* GetOwnerController() const;
 
 protected:
     virtual void BeginPlay() override;
 
 private:
+    /**
+     * Обработчик столкновения снаряда с объектом.
+     * @param HitComponent Компонент, который столкнулся
+     * @param OtherActor Другой актор
+     * @param OtherComp Другой компонент
+     * @param NormalImpulse Нормальный импульс
+     * @param Hit Результат столкновения
+     */
     UFUNCTION()
     void OnProjectileHit(UPrimitiveComponent* HitComponent,
         AActor* OtherActor,
@@ -30,27 +45,53 @@ private:
         FVector NormalImpulse,
         const FHitResult& Hit);
 
-    AController* GetController() const;
+    /**
+     * Применяет урон в радиусе взрыва.
+     * @param ExplosionLocation Место взрыва
+     */
+    void ApplyExplosionDamage(const FVector& ExplosionLocation);
+
+    /**
+     * Отрисовывает отладочную информацию о взрыве.
+     * @param ExplosionLocation Место взрыва
+     */
+    void DrawExplosionDebug(const FVector& ExplosionLocation) const;
 
 protected:
-    UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+    /** Компонент коллизии снаряда */
+    UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
     USphereComponent* CollisionComponent;
 
-    UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+    /** Компонент движения снаряда */
+    UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
     UProjectileMovementComponent* MovementComponent;
 
-    UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    float DamageRadius = 200.f;
+    /** Радиус урона от взрыва */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Projectile Settings",
+        meta = (ClampMin = "10.0", ClampMax = "1000.0"))
+    float ExplosionRadius = 200.0f;
 
-    UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    float DamageAmount = 50.f;
+    /** Количество урона от взрыва */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Projectile Settings",
+        meta = (ClampMin = "1.0", ClampMax = "1000.0"))
+    float ExplosionDamage = 50.0f;
 
-    UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    bool DoFullDamage = false;
+    /** Применять полный урон всем целям в радиусе */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Settings")
+    bool bApplyFullDamageToAll = false;
 
-    UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    float LifeSeconds = 5.f;
+    /** Время жизни снаряда в секундах */
+    UPROPERTY(EditDefaultsOnly,
+        BlueprintReadWrite,
+        Category = "Projectile Settings",
+        meta = (ClampMin = "1.0", ClampMax = "60.0"))
+    float LifeTime = 5.0f;
 
 private:
+    /** Направление полета снаряда */
     FVector ShootDirection;
 };

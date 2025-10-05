@@ -34,4 +34,19 @@ protected:
      * Реализует логику трейсинга и нанесения урона.
      */
     virtual void MakeShot() override;
+
+private:
+    /**
+     * Отрисовывает отладочную информацию о выстреле.
+     * @param TraceStart Начальная точка трейсинга
+     * @param TraceEnd Конечная точка трейсинга
+     * @param HitResult Результат трейсинга
+     */
+    void DrawDebugInformation(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const;
+
+    /**
+     * Обрабатывает результат попадания.
+     * @param HitResult Результат попадания
+     */
+    void ProcessHitResult(const FHitResult& HitResult);
 };

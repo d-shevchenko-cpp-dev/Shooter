@@ -65,36 +65,55 @@ void ASTURiffleWeapon::MakeShot()
     FHitResult HitResult;
     PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
+    // Отображение отладочной информации
+    DrawDebugInformation(TraceStart, TraceEnd, HitResult);
+
+    // Обработка результата попадания и применение урона
+    ProcessHitResult(HitResult);
+}
+
+void ASTURiffleWeapon::DrawDebugInformation(const FVector& TraceStart,
+    const FVector& TraceEnd,
+    const FHitResult& HitResult) const
+{
+    if (!GetWorld())
+    {
+        return;
+    }
+
+    // Отрисовка линии трейсинга
+    DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
+
     // Получение позиции камеры для отладочной информации
     const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
     const APlayerController* PlayerController =
         OwnerCharacter ? OwnerCharacter->GetController<APlayerController>() : nullptr;
-    FVector CameraLocation;
-    FRotator CameraRotation;
+
     if (PlayerController)
     {
+        FVector CameraLocation;
+        FRotator CameraRotation;
         PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+        const FVector CameraDirection = CameraRotation.Vector();
+        const FVector TargetPoint = CameraLocation + CameraDirection * GetWeaponConfiguration()->MaxRange;
+
+        // Отрисовка направления камеры
+        DrawDebugLine(GetWorld(), CameraLocation, TargetPoint, FColor::Blue, false, 3.0f, 0, 2.0f);
+
+        // Отрисовка сферы разброса
+        DrawDebugSphere(GetWorld(), TargetPoint, 5.0f, 8, FColor::Yellow, false, 3.0f);
     }
 
-    // Отображение отладочной информации через менеджер
-    if (DebugManager)
+    // Если попали в цель, рисуем сферу в точке попадания
+    if (HitResult.bBlockingHit)
     {
-        DebugManager->DrawTraceLine(GetWorld(), TraceStart, TraceEnd);
-        if (PlayerController)
-        {
-            const FVector CameraDirection = CameraRotation.Vector();
-            const FVector TargetPoint = CameraLocation + CameraDirection * WeaponData.MaxRange;
-            DebugManager->DrawCameraLine(GetWorld(), CameraLocation, TargetPoint);
-            DebugManager->DrawSpreadSphere(GetWorld(), TargetPoint);
-        }
-
-        if (HitResult.bBlockingHit)
-        {
-            DebugManager->DrawHitSphere(GetWorld(), HitResult.ImpactPoint);
-        }
+        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 3.0f);
     }
+}
 
-    // Обработка результата попадания и применение урона
+void ASTURiffleWeapon::ProcessHitResult(const FHitResult& HitResult)
+{
     float DamageDealt = 0.0f;
     bool bIsHeadshot = false;
 

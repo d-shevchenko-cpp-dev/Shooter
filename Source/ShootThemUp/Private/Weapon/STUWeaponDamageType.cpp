@@ -1,11 +1,8 @@
-// Игра ShootThemUp. Все права защищены.
+// ShootThemUp Game. All Right Reserved.
 
 #include "Weapon/STUWeaponDamageType.h"
 
 USTUWeaponDamageType::USTUWeaponDamageType()
 {
-    // Установка свойств по умолчанию для урона от оружия
-    bCausedByWorld = false;
-    bScaleMomentumByMass = true;
-    bRadialDamageVelChange = true;
+    // Конструктор по умолчанию
 }

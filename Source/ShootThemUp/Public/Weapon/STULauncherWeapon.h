@@ -8,6 +8,10 @@
 
 class ASTUProjectile;
 
+/**
+ * Класс гранатомета.
+ * Реализует логику запуска снарядов.
+ */
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTULauncherWeapon : public ASTUBaseWeapon
 {
@@ -21,9 +25,21 @@ public:
     virtual void StopFire() override;
 
 protected:
+    /**
+     * Выполняет один выстрел из гранатомета.
+     * Реализует логику создания и запуска снаряда.
+     */
     virtual void MakeShot() override;
 
-protected:
+    /** Класс снаряда для запуска */
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     TSubclassOf<ASTUProjectile> ProjectileClass;
+
+private:
+    /**
+     * Запускает снаряд в указанном направлении.
+     * @param TraceStart Начальная точка траектории
+     * @param TraceEnd Конечная точка траектории
+     */
+    void LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd);
 };
