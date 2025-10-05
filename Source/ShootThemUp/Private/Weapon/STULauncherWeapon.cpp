@@ -1,7 +1,7 @@
 // ShootThemUp Game. All Right Reserved.
 
 #include "Weapon/STULauncherWeapon.h"
-#include "Weapon/STU_Projectile.h"
+#include "Weapon/STUProjectile.h"
 #include "kismet/GameplayStatics.h"
 #include "Engine/World.h"
 

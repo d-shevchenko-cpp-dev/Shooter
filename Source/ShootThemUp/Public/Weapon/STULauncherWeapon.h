@@ -6,7 +6,7 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "STULauncherWeapon.generated.h"
 
-class ASTU_Projectile;
+class ASTUProjectile;
 
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTULauncherWeapon : public ASTUBaseWeapon
@@ -25,5 +25,5 @@ protected:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    TSubclassOf<ASTU_Projectile> ProjectileClass;
+    TSubclassOf<ASTUProjectile> ProjectileClass;
 };

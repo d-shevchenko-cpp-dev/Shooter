@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "STU_Projectile.generated.h"
+#include "STUProjectile.generated.h"
 
 class USphereComponent;
 
 UCLASS()
-class SHOOTTHEMUP_API ASTU_Projectile : public AActor
+class SHOOTTHEMUP_API ASTUProjectile : public AActor
 {
     GENERATED_BODY()
 
 public:
-    ASTU_Projectile();
+    ASTUProjectile();
 
 protected:
     virtual void BeginPlay() override;

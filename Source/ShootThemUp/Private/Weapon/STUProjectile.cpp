@@ -1,9 +1,9 @@
 // ShootThemUp Game. All Right Reserved.
 
-#include "Weapon/STU_Projectile.h"
+#include "Weapon/STUProjectile.h"
 #include "Components/SphereComponent.h"
 
-ASTU_Projectile::ASTU_Projectile()
+ASTUProjectile::ASTUProjectile()
 {
     PrimaryActorTick.bCanEverTick = false;
 
@@ -12,7 +12,7 @@ ASTU_Projectile::ASTU_Projectile()
     SetRootComponent(CollisionComponent);
 }
 
-void ASTU_Projectile::BeginPlay()
+void ASTUProjectile::BeginPlay()
 {
     Super::BeginPlay();
 }
