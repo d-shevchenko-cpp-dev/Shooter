@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Components/ActorComponent.h"
 #include "STUWeaponDebugManager.generated.h"
 
 /**
@@ -115,7 +115,7 @@ struct SHOOTTHEMUP_API FSTUWeaponDebugSettings
  * Предоставляет централизованное управление отрисовкой отладочной информации.
  */
 UCLASS(BlueprintType, Blueprintable)
-class SHOOTTHEMUP_API USTUWeaponDebugManager : public UObject
+class SHOOTTHEMUP_API USTUWeaponDebugManager : public UActorComponent
 {
     GENERATED_BODY()
 
