@@ -1,19 +1,29 @@
-# IDE
-.vscode/
-.vs/
-*.sln
-.idea/
-
-# Compiled files
+# Unreal typical
 Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
-Build/
-Plugins/
+.vscode/
+.idea/
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.userprefs
+*.DotSettings.user
+*.opensdf
+*.sdf
+*.log
+*.vs/
 
 # Build artifacts
-*.pdb
-*.exe
 *.dll
+*.exe
+*.pdb
+*.lib
+*.exp
 
+# System / OS
+.DS_Store
+Thumbs.db
+desktop.ini
