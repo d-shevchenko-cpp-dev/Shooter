@@ -1,6 +1,8 @@
 // ShootThemUp Game. All Right Reserved.
 
 #include "Weapon/STULauncherWeapon.h"
+#include "Weapon/STU_Projectile.h"
+#include "kismet/GameplayStatics.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
@@ -47,6 +49,14 @@ void ASTULauncherWeapon::MakeShot()
     }
 
     UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - placeholder implementation"));
+
+    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
+    const FVector SocketLocation = SocketTransform.GetLocation();
+
+    const FTransform SpawnTransform(FRotator::ZeroRotator, SocketLocation);
+    auto Projectile = UGameplayStatics::BeginDeferredActorSpawnFromClass(GetWorld(), ProjectileClass, SpawnTransform);
+    // set projectile params
+    UGameplayStatics::FinishSpawningActor(Projectile, SpawnTransform);
 
     // TODO: В будущем здесь будет реализация:
     // 1. Создание снаряда (гранаты/ракеты)
