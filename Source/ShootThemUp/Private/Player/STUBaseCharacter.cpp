@@ -89,6 +89,8 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     // Привязки оружия
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::StartShooting);
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopShooting);
+
+    PlayerInputComponent->BindAction("SwitchWeapon", IE_Pressed, WeaponComponent, &USTUWeaponComponent::SwitchWeapon);
 }
 
 bool ASTUBaseCharacter::IsRunning() const

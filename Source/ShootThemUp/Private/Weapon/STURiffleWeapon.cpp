@@ -125,18 +125,12 @@ void ASTURiffleWeapon::ProcessHitResult(const FHitResult& HitResult)
             HitResult.GetActor() ? *HitResult.GetActor()->GetName() : TEXT("Unknown"),
             *HitResult.BoneName.ToString());
 
-        // Применение урона к пораженной цели
         if (AActor* HitActor = HitResult.GetActor())
         {
             bIsHeadshot = IsHeadshot(HitResult.BoneName);
             DamageDealt = ApplyDamageToTarget(HitActor, HitResult);
         }
     }
-    else
-    {
-        UE_LOG(LogRiffleWeapon, VeryVerbose, TEXT("Rifle shot missed"));
-    }
 
-    // Вызываем событие выстрела
     OnWeaponShot.Broadcast(HitResult, DamageDealt, bIsHeadshot);
 }

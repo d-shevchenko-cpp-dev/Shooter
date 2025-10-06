@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,11 +5,6 @@
 #include "STUWeaponComponent.generated.h"
 
 class ASTUBaseWeapon;
-
-/**
- * Компонент оружия для управления оружием персонажа.
- * Отвечает за создание и управление экземпляром оружия.
- */
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
@@ -21,31 +14,43 @@ class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
 public:
     USTUWeaponComponent();
 
-    /**
-     * Производит выстрел из текущего оружия.
-     */
     void StartShooting();
     void StopShooting();
+
+    void SwitchWeapon();
 
 protected:
     virtual void BeginPlay() override;
 
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
-    /**
-     * Создает экземпляр оружия и прикрепляет его к персонажу.
-     */
-    void SpawnWeapon();
+    void SpawnWeapons();
+
+    void AttachWeaponsToActor();
+
+    void AttachWeaponToSocket(USkeletalMeshComponent* Mesh, ASTUBaseWeapon* Weapon, const FName& SocketName);
+
+    void EquipWeapon(int32 WeaponIndex);
 
 protected:
-    /** Класс оружия для создания */
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+    TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
 
-    /** Имя точки прикрепления оружия */
+    /** Socket в руке*/
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    FName WeaponAttachPointName = "WeaponSocket";
+    FName WeaponEquipSocketName = "WeaponSocket";
+
+    /** Socket на спине */
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    FName WeaponArmorySocketName = "ArmorySocket";
 
 private:
-    /** Текущее оружие */
+    UPROPERTY()
     ASTUBaseWeapon* CurrentWeapon;
+
+    UPROPERTY()
+    TArray<ASTUBaseWeapon*> Weapons;
+
+    int32 CurrentWeaponIndex{ 0 };
 };
