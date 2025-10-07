@@ -1,6 +1,6 @@
 // Игра ShootThemUp. Все права защищены.
 
-#include "Player/Components/STUCharacterMovementComponent.h"
+#include "Components/STUCharacterMovementComponent.h"
 #include "Player/STUBaseCharacter.h"
 
 float USTUCharacterMovementComponent::GetMaxSpeed() const

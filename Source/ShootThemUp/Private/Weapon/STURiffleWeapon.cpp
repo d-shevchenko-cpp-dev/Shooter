@@ -1,7 +1,6 @@
 // ShootThemUp Game. All Right Reserved.
 
 #include "Weapon/STURiffleWeapon.h"
-#include "Player/Components/STUHealthComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "Engine/World.h"

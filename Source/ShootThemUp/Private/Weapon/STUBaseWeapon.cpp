@@ -3,13 +3,11 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/STUDamageComponent.h"
-#include "Player/Components/STUHealthComponent.h"
+#include "Components/STUHealthComponent.h"
 #include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "Engine/World.h"
-#include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
-#include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);

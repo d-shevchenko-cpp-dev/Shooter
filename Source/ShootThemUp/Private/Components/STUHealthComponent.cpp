@@ -1,6 +1,6 @@
 // Игра ShootThemUp. Все права защищены.
 
-#include "Player/Components/STUHealthComponent.h"
+#include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All);

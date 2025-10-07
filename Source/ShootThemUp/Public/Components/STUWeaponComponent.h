@@ -33,6 +33,14 @@ private:
 
     void EquipWeapon(int32 WeaponIndex);
 
+    void PlayAnimMontage(UAnimMontage* AnimMontage);
+
+    void InitAnimations();
+
+    void OnWeaponEquipFinished(USkeletalMeshComponent* MeshComponent);
+
+    ACharacter* GetCharacter();
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
@@ -44,6 +52,9 @@ protected:
     /** Socket на спине */
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponArmorySocketName = "ArmorySocket";
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* EquipAnimMontage;
 
 private:
     UPROPERTY()
