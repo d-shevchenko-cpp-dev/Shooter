@@ -25,10 +25,6 @@ public:
     virtual void StopFire() override;
 
 protected:
-    /**
-     * Выполняет один выстрел из гранатомета.
-     * Реализует логику создания и запуска снаряда.
-     */
     virtual void MakeShot() override;
 
     /** Класс снаряда для запуска */
@@ -36,10 +32,5 @@ protected:
     TSubclassOf<ASTUProjectile> ProjectileClass;
 
 private:
-    /**
-     * Запускает снаряд в указанном направлении.
-     * @param TraceStart Начальная точка траектории
-     * @param TraceEnd Конечная точка траектории
-     */
     void LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd);
 };

@@ -63,9 +63,6 @@ void ASTUBaseWeapon::BeginPlay()
         WeaponConfiguration->ValidateConfiguration();
     }
 
-    // Инициализация сервисов
-    InitializeServices();
-
     UE_LOG(LogBaseWeapon, Log, TEXT("Weapon initialized successfully"));
 }
 
@@ -250,13 +247,6 @@ float ASTUBaseWeapon::GetCachedSpreadRadians() const
     }
 
     return CachedSpreadRadians;
-}
-
-void ASTUBaseWeapon::InitializeServices()
-{
-    // Инициализация сервисов будет выполнена в дочерних классах
-    // или через dependency injection
-    UE_LOG(LogBaseWeapon, Log, TEXT("Services initialization completed"));
 }
 
 bool ASTUBaseWeapon::ValidateComponents() const

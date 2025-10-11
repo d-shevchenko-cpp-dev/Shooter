@@ -30,14 +30,6 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    /**
-     * Обработчик столкновения снаряда с объектом.
-     * @param HitComponent Компонент, который столкнулся
-     * @param OtherActor Другой актор
-     * @param OtherComp Другой компонент
-     * @param NormalImpulse Нормальный импульс
-     * @param Hit Результат столкновения
-     */
     UFUNCTION()
     void OnProjectileHit(UPrimitiveComponent* HitComponent,
         AActor* OtherActor,
@@ -45,16 +37,8 @@ private:
         FVector NormalImpulse,
         const FHitResult& Hit);
 
-    /**
-     * Применяет урон в радиусе взрыва.
-     * @param ExplosionLocation Место взрыва
-     */
     void ApplyExplosionDamage(const FVector& ExplosionLocation);
 
-    /**
-     * Отрисовывает отладочную информацию о взрыве.
-     * @param ExplosionLocation Место взрыва
-     */
     void DrawExplosionDebug(const FVector& ExplosionLocation) const;
 
 protected:

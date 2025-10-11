@@ -41,6 +41,10 @@ private:
 
     ACharacter* GetCharacter();
 
+    bool CanFire() const;
+
+    bool CanEquip() const;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
@@ -64,4 +68,6 @@ private:
     TArray<ASTUBaseWeapon*> Weapons;
 
     int32 CurrentWeaponIndex{ 0 };
+
+    bool EquipAnimInProcess{ false };
 };
