@@ -69,6 +69,7 @@ void ASTULauncherWeapon::MakeShot()
     // Создаем пустой результат попадания для события
     FHitResult EmptyHitResult;
     OnWeaponShot.Broadcast(EmptyHitResult, 0.0f, false);
+    DecreaseAmmo();
 }
 
 void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd)

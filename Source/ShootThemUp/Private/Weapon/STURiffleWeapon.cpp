@@ -8,10 +8,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiffleWeapon, All, All);
 
-ASTURiffleWeapon::ASTURiffleWeapon()
-{
-    // Конструктор по умолчанию
-}
+ASTURiffleWeapon::ASTURiffleWeapon() {}
 
 void ASTURiffleWeapon::Fire()
 {
@@ -23,24 +20,17 @@ void ASTURiffleWeapon::Fire()
 
     UE_LOG(LogRiffleWeapon, Display, TEXT("Starting rifle fire"));
 
-    // Выполняем первый выстрел немедленно
     MakeShot();
 
-    // Запускаем автоматическую стрельбу
     StartAutomaticFire();
 
-    // Вызываем событие начала стрельбы
     OnWeaponFireStarted.Broadcast();
 }
 
 void ASTURiffleWeapon::StopFire()
 {
-    UE_LOG(LogRiffleWeapon, Display, TEXT("Stopping rifle fire"));
-
-    // Останавливаем автоматическую стрельбу
     StopAutomaticFire();
 
-    // Вызываем событие остановки стрельбы
     OnWeaponFireStopped.Broadcast();
 }
 
@@ -48,27 +38,27 @@ void ASTURiffleWeapon::MakeShot()
 {
     if (!IsValidForShooting())
     {
-        UE_LOG(LogRiffleWeapon, Warning, TEXT("Rifle is not valid for shooting"));
+        if (IsAmmoEmpty())
+        {
+            StopFire();
+        }
         return;
     }
 
-    // Получение точек траектории выстрела
     FVector TraceStart, TraceEnd;
     if (!GetShotTrajectoryPoints(TraceStart, TraceEnd))
     {
-        UE_LOG(LogRiffleWeapon, Error, TEXT("Failed to get shot trajectory points"));
         return;
     }
 
-    // Выполнение линейного трейсинга
     FHitResult HitResult;
     PerformLineTrace(TraceStart, TraceEnd, HitResult);
 
-    // Отображение отладочной информации
     DrawDebugInformation(TraceStart, TraceEnd, HitResult);
 
-    // Обработка результата попадания и применение урона
     ProcessHitResult(HitResult);
+
+    DecreaseAmmo();
 }
 
 void ASTURiffleWeapon::DrawDebugInformation(const FVector& TraceStart,

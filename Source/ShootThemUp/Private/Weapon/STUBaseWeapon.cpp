@@ -16,16 +16,13 @@ ASTUBaseWeapon::ASTUBaseWeapon()
 {
     PrimaryActorTick.bCanEverTick = false;
 
-    // Создание компонентов
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
     RootComponent = WeaponMesh;
 
     DamageComponent = CreateDefaultSubobject<USTUDamageComponent>(TEXT("DamageComponent"));
 
-    // Создание конфигурации оружия
     WeaponConfiguration = CreateDefaultSubobject<USTUWeaponConfiguration>(TEXT("WeaponConfiguration"));
 
-    // Инициализация данных оружия значениями по умолчанию
     CachedSpreadRadians = -1.0f;
 }
 
@@ -50,20 +47,18 @@ void ASTUBaseWeapon::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Валидация компонентов
     if (!ValidateComponents())
     {
         UE_LOG(LogBaseWeapon, Error, TEXT("Weapon components validation failed"));
         return;
     }
 
-    // Валидация конфигурации
     if (WeaponConfiguration)
     {
         WeaponConfiguration->ValidateConfiguration();
     }
 
-    UE_LOG(LogBaseWeapon, Log, TEXT("Weapon initialized successfully"));
+    CurrentAmmo = DefaultAmmo;
 }
 
 void ASTUBaseWeapon::StartAutomaticFire()
@@ -121,6 +116,11 @@ bool ASTUBaseWeapon::IsValidForShooting() const
     if (!PlayerController)
     {
         UE_LOG(LogBaseWeapon, Warning, TEXT("PlayerController is not valid"));
+        return false;
+    }
+
+    if (IsAmmoEmpty())
+    {
         return false;
     }
 
@@ -270,4 +270,43 @@ bool ASTUBaseWeapon::ValidateComponents() const
     }
 
     return true;
+}
+
+void ASTUBaseWeapon::DecreaseAmmo()
+{
+    CurrentAmmo.Bullets--;
+    LogAmmo();
+
+    if (IsClipEmpty() && !IsAmmoEmpty())
+    {
+        ChangeClip();
+    }
+}
+
+bool ASTUBaseWeapon::IsAmmoEmpty() const
+{
+    return IsClipEmpty() && !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0;
+}
+
+bool ASTUBaseWeapon::IsClipEmpty() const
+{
+    return CurrentAmmo.Bullets == 0;
+}
+
+void ASTUBaseWeapon::ChangeClip()
+{
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
+    if (!CurrentAmmo.Infinite)
+    {
+        CurrentAmmo.Clips--;
+    }
+    UE_LOG(LogBaseWeapon, Display, TEXT("ASTUBaseWeapon::ChangeClip"));
+}
+
+void ASTUBaseWeapon::LogAmmo()
+{
+    FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + "/\n";
+    AmmoInfo += CurrentAmmo.Infinite ? "Infinite\n" : FString::FromInt(CurrentAmmo.Clips);
+    UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }

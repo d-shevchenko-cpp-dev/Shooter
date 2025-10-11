@@ -15,12 +15,6 @@ class USTUDamageComponent;
 class UDamageType;
 struct FHitResult;
 
-/**
- * Делегат для события выстрела из оружия.
- * @param HitResult Результат попадания (может быть пустым если промах)
- * @param DamageDealt Количество нанесенного урона (0 если промах)
- * @param bIsHeadshot Является ли попадание headshot'ом
- */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponShot,
     const FHitResult&,
     HitResult,
@@ -29,19 +23,25 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponShot,
     bool,
     bIsHeadshot);
 
-/**
- * Делегат для события начала стрельбы.
- */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireStarted);
 
-/**
- * Делегат для события остановки стрельбы.
- */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireStopped);
 
-/**
- * Базовый класс для всех видов оружия в игре.
- */
+USTRUCT(BlueprintType)
+struct FAmmoData
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    int32 Bullets;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infinite"))
+    int32 Clips;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    bool Infinite;
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 {
@@ -101,6 +101,25 @@ protected:
     UFUNCTION(BlueprintPure, Category = "Weapon")
     virtual FVector GetShootDirection(const FVector& BaseDirection) const;
 
+    void DecreaseAmmo();
+
+    bool IsAmmoEmpty() const;
+
+    bool IsClipEmpty() const;
+
+    void ChangeClip();
+
+    void LogAmmo();
+
+private:
+    /**
+     * Получает кэшированное значение разброса в радианах с учетом здоровья.
+     * @return Разброс в радианах
+     */
+    float GetCachedSpreadRadians() const;
+
+    bool ValidateComponents() const;
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USkeletalMeshComponent* WeaponMesh;
@@ -110,24 +129,21 @@ protected:
     USTUDamageComponent* DamageComponent;
 
     /** Конфигурация оружия */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
     USTUWeaponConfiguration* WeaponConfiguration;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings", meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+    FAmmoData DefaultAmmo{ 15, 10, false };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
     FName MuzzleSocketName = TEXT("MuzzleSocket");
 
 private:
     /** Таймер для автоматической стрельбы */
     FTimerHandle ShotTimerHandle;
 
+    FAmmoData CurrentAmmo;
+
     /** Кэшированное значение разброса в радианах для оптимизации */
     mutable float CachedSpreadRadians = -1.0f;
-
-    /**
-     * Получает кэшированное значение разброса в радианах с учетом здоровья.
-     * @return Разброс в радианах
-     */
-    float GetCachedSpreadRadians() const;
-
-    bool ValidateComponents() const;
 };
