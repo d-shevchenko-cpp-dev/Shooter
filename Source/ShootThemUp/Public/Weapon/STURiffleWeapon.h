@@ -1,5 +1,3 @@
-// ShootThemUp Game. All Right Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,8 +12,7 @@ class SHOOTTHEMUP_API ASTURiffleWeapon : public ASTUBaseWeapon
 public:
     ASTURiffleWeapon();
 
-    virtual void Fire() override;
-
+    virtual void StartFire() override;
     virtual void StopFire() override;
 
 protected:

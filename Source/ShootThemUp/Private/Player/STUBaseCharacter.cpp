@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #include "STUBaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -19,29 +17,24 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjectInitializer
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // Инициализация Spring Arm компонента
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
     check(SpringArmComponent);
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true;
     SpringArmComponent->SocketOffset = FVector(0.0f, SPRING_ARM_SOCKET_OFFSET_Y, SPRING_ARM_SOCKET_OFFSET_Z);
 
-    // Инициализация Camera компонента
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
     check(CameraComponent);
     CameraComponent->SetupAttachment(SpringArmComponent);
 
-    // Инициализация Health компонента
     HealthComponent = CreateDefaultSubobject<USTUHealthComponent>(TEXT("HealthComponent"));
     check(HealthComponent);
 
-    // Инициализация Health Text компонента
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthTextComponent"));
     check(HealthTextComponent);
     HealthTextComponent->SetupAttachment(GetRootComponent());
     HealthTextComponent->SetOwnerNoSee(true);
 
-    // Инициализация Weapon компонента
     WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>(TEXT("WeaponComponent"));
     check(WeaponComponent);
 }
@@ -91,6 +84,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopShooting);
 
     PlayerInputComponent->BindAction("SwitchWeapon", IE_Pressed, WeaponComponent, &USTUWeaponComponent::SwitchWeapon);
+    PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Reload);
 }
 
 bool ASTUBaseCharacter::IsRunning() const

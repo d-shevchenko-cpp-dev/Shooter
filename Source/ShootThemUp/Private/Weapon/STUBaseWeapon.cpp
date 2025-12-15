@@ -1,9 +1,8 @@
-// ShootThemUp Game. All Right Reserved.
-
 #include "Weapon/STUBaseWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/STUDamageComponent.h"
 #include "Components/STUHealthComponent.h"
+#include "Components/STUAmmoComponent.h"
 #include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
@@ -20,10 +19,8 @@ ASTUBaseWeapon::ASTUBaseWeapon()
     RootComponent = WeaponMesh;
 
     DamageComponent = CreateDefaultSubobject<USTUDamageComponent>(TEXT("DamageComponent"));
-
+    AmmoComponent = CreateDefaultSubobject<USTUAmmoComponent>(TEXT("AmmoComponent"));
     WeaponConfiguration = CreateDefaultSubobject<USTUWeaponConfiguration>(TEXT("WeaponConfiguration"));
-
-    CachedSpreadRadians = -1.0f;
 }
 
 bool ASTUBaseWeapon::CanFire() const
@@ -58,7 +55,10 @@ void ASTUBaseWeapon::BeginPlay()
         WeaponConfiguration->ValidateConfiguration();
     }
 
-    CurrentAmmo = DefaultAmmo;
+    if (AmmoComponent)
+    {
+        AmmoComponent->Initialize({});
+    }
 }
 
 void ASTUBaseWeapon::StartAutomaticFire()
@@ -83,96 +83,22 @@ void ASTUBaseWeapon::StopAutomaticFire()
 
 bool ASTUBaseWeapon::IsValidForShooting() const
 {
-    if (!GetWorld())
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("World is not valid"));
-        return false;
-    }
-
-    if (!WeaponMesh)
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("WeaponMesh is not valid"));
-        return false;
-    }
-
+    check(GetWorld());
+    check(WeaponMesh);
+    check(AmmoComponent);
     const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (!OwnerCharacter)
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is not a Character"));
-        return false;
-    }
-
-    // Проверяем, не мертв ли владелец оружия
-    if (const auto* HealthComponent = OwnerCharacter->FindComponentByClass<USTUHealthComponent>())
-    {
-        if (HealthComponent->IsDead())
-        {
-            UE_LOG(LogBaseWeapon, Warning, TEXT("Owner is dead, cannot shoot"));
-            return false;
-        }
-    }
-
+    check(OwnerCharacter);
+    const auto* HealthComponent = OwnerCharacter->FindComponentByClass<USTUHealthComponent>();
+    check(HealthComponent);
     const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
-    if (!PlayerController)
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("PlayerController is not valid"));
-        return false;
-    }
+    check(PlayerController);
 
-    if (IsAmmoEmpty())
+    if (HealthComponent->IsDead() || AmmoComponent->IsAmmoEmpty())
     {
         return false;
     }
 
     return true;
-}
-
-bool ASTUBaseWeapon::GetShotTrajectoryPoints(FVector& TraceStart, FVector& TraceEnd) const
-{
-    // Получение владельца оружия
-    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (!OwnerCharacter)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("Owner is not a Character"));
-        return false;
-    }
-
-    // Получение контроллера игрока
-    const APlayerController* PlayerController = OwnerCharacter->GetController<APlayerController>();
-    if (!PlayerController)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("PlayerController is not valid"));
-        return false;
-    }
-
-    // Получение позиции и направления камеры
-    FVector CameraLocation;
-    FRotator CameraRotation;
-    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-    // Определение начальной точки трейсинга (позиция сокета дула)
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
-    TraceStart = SocketTransform.GetLocation();
-
-    // Вычисляем направление от позиции оружия к точке, куда смотрит камера
-    const FVector CameraDirection = CameraRotation.Vector();
-    const FVector TargetPoint = CameraLocation + CameraDirection * WeaponConfiguration->MaxRange;
-    const FVector ShootDirection = (TargetPoint - TraceStart).GetSafeNormal();
-    const FVector FinalShootDirection = GetShootDirection(ShootDirection);
-    TraceEnd = TraceStart + FinalShootDirection * WeaponConfiguration->MaxRange;
-
-    return true;
-}
-
-void ASTUBaseWeapon::PerformLineTrace(const FVector& TraceStart, const FVector& TraceEnd, FHitResult& HitResult) const
-{
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(GetOwner());
-    QueryParams.bReturnPhysicalMaterial = true;
-    QueryParams.bTraceComplex = false; // Оптимизация для лучшей производительности
-
-    GetWorld()->LineTraceSingleByChannel(
-        HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, QueryParams);
 }
 
 float ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitResult)
@@ -183,7 +109,6 @@ float ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitR
         return 0.0f;
     }
 
-    // Вычисление финального количества урона на основе места попадания
     float FinalDamage = WeaponConfiguration->DamageAmount;
     bool bIsHeadshot = IsHeadshot(HitResult.BoneName);
 
@@ -208,11 +133,8 @@ float ASTUBaseWeapon::ApplyDamageToTarget(AActor* Target, const FHitResult& HitR
             bIsHeadshot ? TEXT(" (HEADSHOT)") : TEXT(""));
         return FinalDamage;
     }
-    else
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Failed to deal damage to %s"), *Target->GetName());
-        return 0.0f;
-    }
+
+    return 0.0f;
 }
 
 bool ASTUBaseWeapon::IsHeadshot(const FName& HitBoneName) const
@@ -225,88 +147,12 @@ bool ASTUBaseWeapon::IsHeadshot(const FName& HitBoneName) const
     return WeaponConfiguration->IsHeadshot(HitBoneName);
 }
 
-FVector ASTUBaseWeapon::GetShootDirection(const FVector& BaseDirection) const
-{
-    const float SpreadRadians = GetCachedSpreadRadians();
-    return FMath::VRandCone(BaseDirection, SpreadRadians);
-}
-
-float ASTUBaseWeapon::GetCachedSpreadRadians() const
-{
-    if (CachedSpreadRadians < 0.0f && WeaponConfiguration)
-    {
-        CachedSpreadRadians = WeaponConfiguration->GetSpreadRadians();
-    }
-
-    // Применяем модификатор здоровья, если он включен
-    if (WeaponConfiguration && WeaponConfiguration->bEnableHealthSpreadModifier)
-    {
-        // Здесь должна быть логика получения множителя здоровья
-        // Пока что возвращаем базовый разброс
-        return CachedSpreadRadians;
-    }
-
-    return CachedSpreadRadians;
-}
-
 bool ASTUBaseWeapon::ValidateComponents() const
 {
-    if (!WeaponMesh)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("WeaponMesh component is not valid"));
-        return false;
-    }
-
-    if (!DamageComponent)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("DamageComponent is not valid"));
-        return false;
-    }
-
-    if (!WeaponConfiguration)
-    {
-        UE_LOG(LogBaseWeapon, Error, TEXT("WeaponConfiguration is not valid"));
-        return false;
-    }
+    check(WeaponMesh);
+    check(DamageComponent);
+    check(AmmoComponent);
+    check(WeaponConfiguration);
 
     return true;
-}
-
-void ASTUBaseWeapon::DecreaseAmmo()
-{
-    CurrentAmmo.Bullets--;
-    LogAmmo();
-
-    if (IsClipEmpty() && !IsAmmoEmpty())
-    {
-        ChangeClip();
-    }
-}
-
-bool ASTUBaseWeapon::IsAmmoEmpty() const
-{
-    return IsClipEmpty() && !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0;
-}
-
-bool ASTUBaseWeapon::IsClipEmpty() const
-{
-    return CurrentAmmo.Bullets == 0;
-}
-
-void ASTUBaseWeapon::ChangeClip()
-{
-    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-
-    if (!CurrentAmmo.Infinite)
-    {
-        CurrentAmmo.Clips--;
-    }
-    UE_LOG(LogBaseWeapon, Display, TEXT("ASTUBaseWeapon::ChangeClip"));
-}
-
-void ASTUBaseWeapon::LogAmmo()
-{
-    FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + "/\n";
-    AmmoInfo += CurrentAmmo.Infinite ? "Infinite\n" : FString::FromInt(CurrentAmmo.Clips);
-    UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }

@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
 

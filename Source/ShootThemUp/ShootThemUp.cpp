@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #include "ShootThemUp.h"
 #include "Modules/ModuleManager.h"
 

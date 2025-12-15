@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #include "Components/STUDamageComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Controller.h"
@@ -56,20 +54,8 @@ bool USTUDamageComponent::ApplyDamageInternal(AActor* Target,
     HitResult.ImpactNormal = FVector::UpVector; // Default impact normal
 
     // Применение точечного урона с использованием системы урона Unreal
-    UGameplayStatics::ApplyPointDamage(Target,
-        // Target actor
-        DamageAmount,
-        // Damage amount
-        HitResult.ImpactNormal,
-        // Damage direction
-        HitResult,
-        // Hit result
-        InstigatorController,
-        // Instigator controller
-        GetOwner(),
-        // Damage causer
-        DamageType // Damage type
-    );
+    UGameplayStatics::ApplyPointDamage(
+        Target, DamageAmount, HitResult.ImpactNormal, HitResult, InstigatorController, GetOwner(), DamageType);
 
     UE_LOG(LogDamageComponent,
         Log,

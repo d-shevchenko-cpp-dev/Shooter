@@ -1,5 +1,3 @@
-// Игра ShootThemUp. Все права защищены.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,12 +9,6 @@ class USTUHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class USTUWeaponComponent;
-class USTUDamageComponent;
-
-/**
- * Базовый класс персонажа для игры ShootThemUp.
- * Предоставляет общую функциональность для всех персонажей, включая движение, здоровье и системы оружия.
- */
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -88,11 +80,9 @@ protected:
     FVector2D LandedDamage{ FVector2D(10.f, 100.f) };
 
 private:
-    // Флаги состояния движения
     bool IsCharacterRunning{ false };
     bool IsCharacterMoving{ false };
 
-    // Константы
     static constexpr float DEATH_LIFESPAN = 5.0f;
     static constexpr float SPRING_ARM_SOCKET_OFFSET_Y = 100.0f;
     static constexpr float SPRING_ARM_SOCKET_OFFSET_Z = 80.0f;

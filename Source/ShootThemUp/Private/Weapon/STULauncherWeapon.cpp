@@ -1,17 +1,18 @@
-// ShootThemUp Game. All Right Reserved.
-
 #include "Weapon/STULauncherWeapon.h"
 #include "Weapon/STUProjectile.h"
+#include "Weapon/Helpers/STUWeaponTraceHelper.h"
+#include "Components/STUAmmoComponent.h"
+#include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
 
 ASTULauncherWeapon::ASTULauncherWeapon()
 {
-    // Конструктор по умолчанию
+    AmmoComponent->Initialize({ 1, 10, false });
 }
 
-void ASTULauncherWeapon::Fire()
+void ASTULauncherWeapon::StartFire()
 {
     if (!CanFire())
     {
@@ -21,10 +22,9 @@ void ASTULauncherWeapon::Fire()
 
     UE_LOG(LogLauncherWeapon, Display, TEXT("Starting launcher fire"));
 
-    // Выполняем один выстрел (гранатометы обычно стреляют по одному выстрелу)
+    // Выполняем один выстрел (гранатометы стреляют по одному)
     MakeShot();
 
-    // Вызываем событие начала стрельбы
     OnWeaponFireStarted.Broadcast();
 }
 
@@ -33,9 +33,6 @@ void ASTULauncherWeapon::StopFire()
     UE_LOG(LogLauncherWeapon, Display, TEXT("Stopping launcher fire"));
 
     // Гранатометы обычно не требуют остановки стрельбы
-    // В будущем здесь может быть логика отмены прицеливания или перезарядки
-
-    // Вызываем событие остановки стрельбы
     OnWeaponFireStopped.Broadcast();
 }
 
@@ -55,21 +52,33 @@ void ASTULauncherWeapon::MakeShot()
 
     UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - creating projectile"));
 
-    // Получение точек траектории выстрела
+    // Подготавливаем параметры для трассировки
+    FWeaponTraceParams TraceParams;
+    TraceParams.Owner = GetOwner();
+    TraceParams.WeaponMesh = GetWeaponMesh();
+    TraceParams.MuzzleSocketName = MuzzleSocketName;
+    TraceParams.WeaponConfig = GetWeaponConfiguration();
+
+    // Вычисляем траекторию с помощью хелпера
     FVector TraceStart, TraceEnd;
-    if (!GetShotTrajectoryPoints(TraceStart, TraceEnd))
+    if (!USTUWeaponTraceHelper::CalculateTrajectory(TraceParams, TraceStart, TraceEnd))
     {
-        UE_LOG(LogLauncherWeapon, Error, TEXT("Failed to get shot trajectory points"));
+        UE_LOG(LogLauncherWeapon, Error, TEXT("Failed to calculate trajectory"));
         return;
     }
 
     // Создание и запуск снаряда
     LaunchProjectile(TraceStart, TraceEnd);
 
+    // Уменьшаем патроны через компонент
+    if (AmmoComponent)
+    {
+        AmmoComponent->TryDecreaseAmmo();
+    }
+
     // Создаем пустой результат попадания для события
     FHitResult EmptyHitResult;
     OnWeaponShot.Broadcast(EmptyHitResult, 0.0f, false);
-    DecreaseAmmo();
 }
 
 void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd)

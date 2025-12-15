@@ -1,6 +1,7 @@
-// ShootThemUp Game. All Right Reserved.
-
 #include "Weapon/STURiffleWeapon.h"
+#include "Weapon/Helpers/STUWeaponTraceHelper.h"
+#include "Components/STUAmmoComponent.h"
+#include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
@@ -8,9 +9,12 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiffleWeapon, All, All);
 
-ASTURiffleWeapon::ASTURiffleWeapon() {}
+ASTURiffleWeapon::ASTURiffleWeapon()
+{
+    AmmoComponent->Initialize({ 30, 5, false });
+}
 
-void ASTURiffleWeapon::Fire()
+void ASTURiffleWeapon::StartFire()
 {
     if (!CanFire())
     {
@@ -21,7 +25,6 @@ void ASTURiffleWeapon::Fire()
     UE_LOG(LogRiffleWeapon, Display, TEXT("Starting rifle fire"));
 
     MakeShot();
-
     StartAutomaticFire();
 
     OnWeaponFireStarted.Broadcast();
@@ -30,7 +33,6 @@ void ASTURiffleWeapon::Fire()
 void ASTURiffleWeapon::StopFire()
 {
     StopAutomaticFire();
-
     OnWeaponFireStopped.Broadcast();
 }
 
@@ -38,27 +40,39 @@ void ASTURiffleWeapon::MakeShot()
 {
     if (!IsValidForShooting())
     {
-        if (IsAmmoEmpty())
+        if (AmmoComponent && AmmoComponent->IsAmmoEmpty())
         {
             StopFire();
         }
         return;
     }
 
+    // Подготавливаем параметры для трассировки
+    FWeaponTraceParams TraceParams;
+    TraceParams.Owner = GetOwner();
+    TraceParams.WeaponMesh = GetWeaponMesh();
+    TraceParams.MuzzleSocketName = MuzzleSocketName;
+    TraceParams.WeaponConfig = GetWeaponConfiguration();
+
+    // Вычисляем траекторию с помощью хелпера
     FVector TraceStart, TraceEnd;
-    if (!GetShotTrajectoryPoints(TraceStart, TraceEnd))
+    if (!USTUWeaponTraceHelper::CalculateTrajectory(TraceParams, TraceStart, TraceEnd))
     {
+        UE_LOG(LogRiffleWeapon, Error, TEXT("Failed to calculate trajectory"));
         return;
     }
 
     FHitResult HitResult;
-    PerformLineTrace(TraceStart, TraceEnd, HitResult);
+    USTUWeaponTraceHelper::PerformLineTrace(GetWorld(), GetOwner(), TraceStart, TraceEnd, HitResult);
 
     DrawDebugInformation(TraceStart, TraceEnd, HitResult);
 
     ProcessHitResult(HitResult);
 
-    DecreaseAmmo();
+    if (AmmoComponent)
+    {
+        AmmoComponent->TryDecreaseAmmo();
+    }
 }
 
 void ASTURiffleWeapon::DrawDebugInformation(const FVector& TraceStart,

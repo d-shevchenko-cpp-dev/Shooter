@@ -1,5 +1,3 @@
-// ShootThemUp Game. All Right Reserved.
-
 #include "Weapon/STUProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -13,14 +11,12 @@ ASTUProjectile::ASTUProjectile()
 {
     PrimaryActorTick.bCanEverTick = false;
 
-    // Создание компонента коллизии
     CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
     CollisionComponent->InitSphereRadius(5.0f);
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
     SetRootComponent(CollisionComponent);
 
-    // Создание компонента движения
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComponent"));
     MovementComponent->InitialSpeed = 2000.0f;
     MovementComponent->MaxSpeed = 2000.0f;
@@ -31,7 +27,6 @@ void ASTUProjectile::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Валидация компонентов
     if (!MovementComponent)
     {
         UE_LOG(LogProjectile, Error, TEXT("MovementComponent is not valid"));
@@ -91,7 +86,6 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent,
     // Отрисовываем отладочную информацию
     DrawExplosionDebug(GetActorLocation());
 
-    // Уничтожаем снаряд
     Destroy();
 }
 
@@ -102,7 +96,6 @@ void ASTUProjectile::ApplyExplosionDamage(const FVector& ExplosionLocation)
         return;
     }
 
-    // Применяем радиальный урон
     UGameplayStatics::ApplyRadialDamage(GetWorld(),
         ExplosionDamage,
         ExplosionLocation,

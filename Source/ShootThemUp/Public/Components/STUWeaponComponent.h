@@ -6,6 +6,18 @@
 
 class ASTUBaseWeapon;
 
+USTRUCT(BlueprintType)
+struct FWeaponReloadAnimMontageData
+{
+    GENERATED_BODY();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    UAnimMontage* ReloadAnimMontage;
+};
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
 {
@@ -15,9 +27,12 @@ public:
     USTUWeaponComponent();
 
     void StartShooting();
+
     void StopShooting();
 
     void SwitchWeapon();
+
+    void Reload();
 
 protected:
     virtual void BeginPlay() override;
@@ -39,15 +54,39 @@ private:
 
     void OnWeaponEquipFinished(USkeletalMeshComponent* MeshComponent);
 
-    ACharacter* GetCharacter();
+    void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
 
-    bool CanFire() const;
+    ACharacter* GetCharacter() const;
 
-    bool CanEquip() const;
+    USkeletalMeshComponent* GetCharacterMesh() const;
+
+    UAnimMontage* GetReloadAnimMontage(ASTUBaseWeapon* Weapon) const;
+
+    bool IsWeaponReadyForAction() const;
+
+    bool IsAnimationInProcess() const;
+
+    template <class T>
+    T* FindNotifyByClass(UAnimSequenceBase* Animation)
+    {
+        if (!Animation)
+        {
+            return nullptr;
+        }
+        const auto NotifyEffects = Animation->Notifies;
+        for (auto NotifyEffect : NotifyEffects)
+        {
+            if (auto AnimNotify = Cast<T>(NotifyEffect.Notify))
+            {
+                return AnimNotify;
+            }
+        }
+        return nullptr;
+    }
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
+    TArray<FWeaponReloadAnimMontageData> WeaponData;
 
     /** Socket в руке*/
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -69,5 +108,5 @@ private:
 
     int32 CurrentWeaponIndex{ 0 };
 
-    bool EquipAnimInProcess{ false };
+    bool bAnimInProcess{ false };
 };

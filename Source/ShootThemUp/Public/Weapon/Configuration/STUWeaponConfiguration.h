@@ -1,5 +1,3 @@
-// ShootThemUp Game. All Right Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,9 +6,6 @@
 
 class UDamageType;
 
-/**
- * Конфигурация оружия с валидацией значений
- */
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API USTUWeaponConfiguration : public UObject
 {
@@ -19,7 +14,6 @@ class SHOOTTHEMUP_API USTUWeaponConfiguration : public UObject
 public:
     USTUWeaponConfiguration();
 
-    // Константы для валидации
     static constexpr float MIN_SHOT_DELAY = 0.01f;
     static constexpr float MAX_SHOT_DELAY = 12.0f;
     static constexpr float MIN_DAMAGE = 0.0f;

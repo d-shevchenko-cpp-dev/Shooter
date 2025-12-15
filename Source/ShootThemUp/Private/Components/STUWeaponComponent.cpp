@@ -1,33 +1,16 @@
 #include "Components/STUWeaponComponent.h"
+
+#include "STUAmmoComponent.h"
 #include "GameFramework/Character.h"
-#include "Animations/STUEquipWeponAnimNotify.h"
+#include "Animations/STUEquipWeaponAnimNotify.h"
+#include "Animations/STUReloadFinishedAnimNotify.h"
 #include "STUBaseWeapon.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogHWeaponComponent, All, All);
+DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
 USTUWeaponComponent::USTUWeaponComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-}
-
-void USTUWeaponComponent::StartShooting()
-{
-    if (!CanFire())
-    {
-        return;
-    }
-
-    CurrentWeapon->Fire();
-}
-
-void USTUWeaponComponent::StopShooting()
-{
-    if (!CurrentWeapon)
-    {
-        return;
-    }
-
-    CurrentWeapon->StopFire();
 }
 
 void USTUWeaponComponent::BeginPlay()
@@ -51,18 +34,34 @@ void USTUWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-void USTUWeaponComponent::SpawnWeapons()
+void USTUWeaponComponent::StartShooting()
 {
-    auto Character = GetCharacter();
-
-    if (!GetWorld() || !Character)
+    if (!IsWeaponReadyForAction())
     {
         return;
     }
 
-    for (auto WeaponClass : WeaponClasses)
+    CurrentWeapon->StartFire();
+}
+
+void USTUWeaponComponent::StopShooting()
+{
+    if (!CurrentWeapon)
     {
-        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
+        return;
+    }
+
+    CurrentWeapon->StopFire();
+}
+
+void USTUWeaponComponent::SpawnWeapons()
+{
+    auto Character = GetCharacter();
+    check(GetWorld())
+
+        for (const auto& Data : WeaponData)
+    {
+        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(Data.WeaponClass);
         if (!Weapon)
         {
             continue;
@@ -76,18 +75,10 @@ void USTUWeaponComponent::SpawnWeapons()
 void USTUWeaponComponent::AttachWeaponsToActor()
 {
     auto Character = GetCharacter();
-
-    if (!Character)
-    {
-        return;
-    }
-
     for (auto Weapon : Weapons)
     {
         Weapon->SetOwner(Character);
-
-        FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
-        Weapon->AttachToComponent(Character->GetMesh(), AttachmentRules, WeaponArmorySocketName);
+        AttachWeaponToSocket(GetCharacterMesh(), Weapon, WeaponArmorySocketName);
     }
 }
 
@@ -101,91 +92,127 @@ void USTUWeaponComponent::AttachWeaponToSocket(USkeletalMeshComponent* Mesh,
 
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
-    auto Character = GetCharacter();
-
-    if (!Character)
+    if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
     {
+        UE_LOG(LogWeaponComponent, Warning, TEXT("Invalid Weapon Index"))
         return;
     }
 
     if (CurrentWeapon)
     {
         StopShooting();
-        AttachWeaponToSocket(Character->GetMesh(), CurrentWeapon, WeaponArmorySocketName);
+        AttachWeaponToSocket(GetCharacterMesh(), CurrentWeapon, WeaponArmorySocketName);
     }
 
-    if (!Weapons.Num())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("USTUWeaponComponent::EquipWeapon Weapons array is empty!"))
-        return;
-    }
     CurrentWeapon = Weapons[WeaponIndex];
-    AttachWeaponToSocket(Character->GetMesh(), CurrentWeapon, WeaponEquipSocketName);
-    EquipAnimInProcess = true;
+
+    AttachWeaponToSocket(GetCharacterMesh(), CurrentWeapon, WeaponEquipSocketName);
+    bAnimInProcess = true;
     PlayAnimMontage(EquipAnimMontage);
 }
 
 void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* AnimMontage)
 {
-    auto Character = GetCharacter();
-    if (!Character)
-    {
-        return;
-    }
-
-    Character->PlayAnimMontage(AnimMontage);
+    GetCharacter()->PlayAnimMontage(AnimMontage);
 }
 
 void USTUWeaponComponent::InitAnimations()
 {
-    if (!EquipAnimMontage)
+    if (auto EquipFinishedNotify = FindNotifyByClass<USTUEquipWeaponAnimNotify>(EquipAnimMontage))
     {
-        return;
+        EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnWeaponEquipFinished);
     }
-    const auto NotifyEvents = EquipAnimMontage->Notifies;
 
-    for (auto NotifyEvent : NotifyEvents)
+    for (const auto& Data : WeaponData)
     {
-        if (auto EquipFinishNotifyEvent = Cast<USTUEquipWeponAnimNotify>(NotifyEvent.Notify))
+        if (auto ReloadFinishedNotify = FindNotifyByClass<USTUReloadFinishedAnimNotify>(Data.ReloadAnimMontage))
         {
-            EquipFinishNotifyEvent->OnNotified.AddUObject(this, &USTUWeaponComponent::OnWeaponEquipFinished);
-            break;
+            ReloadFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
         }
     }
 }
 
-void USTUWeaponComponent::OnWeaponEquipFinished(USkeletalMeshComponent* MeshComponent)
+void USTUWeaponComponent::Reload()
 {
-    auto Character = GetCharacter();
-    if (!Character || MeshComponent != Character->GetMesh())
+    if (!IsWeaponReadyForAction())
     {
         return;
     }
 
-    EquipAnimInProcess = false;
-}
+    if (CurrentWeapon && CurrentWeapon->GetAmmoComponent())
+    {
+        if (!CurrentWeapon->GetAmmoComponent()->CanReload())
+        {
+            UE_LOG(LogWeaponComponent, Warning, TEXT("Cannot reload: clip is full or no clips available"));
+            return;
+        }
+    }
 
-ACharacter* USTUWeaponComponent::GetCharacter()
-{
-    return Cast<ACharacter>(GetOwner());
-}
-
-bool USTUWeaponComponent::CanFire() const
-{
-    return CurrentWeapon && !EquipAnimInProcess;
-}
-
-bool USTUWeaponComponent::CanEquip() const
-{
-    return !EquipAnimInProcess;
+    bAnimInProcess = true;
+    PlayAnimMontage(GetReloadAnimMontage(CurrentWeapon));
 }
 
 void USTUWeaponComponent::SwitchWeapon()
 {
-    if (!CanEquip())
+    if (!IsWeaponReadyForAction())
     {
         return;
     }
     CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
     EquipWeapon(CurrentWeaponIndex);
+}
+
+void USTUWeaponComponent::OnWeaponEquipFinished(USkeletalMeshComponent* MeshComponent)
+{
+    if (MeshComponent != GetCharacterMesh())
+    {
+        return;
+    }
+
+    bAnimInProcess = false;
+}
+
+void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
+{
+    if (MeshComponent != GetCharacterMesh())
+    {
+        return;
+    }
+
+    if (CurrentWeapon && CurrentWeapon->GetAmmoComponent())
+    {
+        CurrentWeapon->GetAmmoComponent()->TryReload();
+    }
+
+    bAnimInProcess = false;
+}
+
+ACharacter* USTUWeaponComponent::GetCharacter() const
+{
+    auto Character = Cast<ACharacter>(GetOwner());
+    check(Character);
+    return Character;
+}
+
+USkeletalMeshComponent* USTUWeaponComponent::GetCharacterMesh() const
+{
+    return GetCharacter()->GetMesh();
+}
+
+UAnimMontage* USTUWeaponComponent::GetReloadAnimMontage(ASTUBaseWeapon* Weapon) const
+{
+    const auto CurrentWeaponData =
+        WeaponData.FindByPredicate([&](const auto& Data) { return Data.WeaponClass == Weapon->GetClass(); });
+
+    return CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+}
+
+bool USTUWeaponComponent::IsAnimationInProcess() const
+{
+    return bAnimInProcess;
+}
+
+bool USTUWeaponComponent::IsWeaponReadyForAction() const
+{
+    return CurrentWeapon && !IsAnimationInProcess();
 }

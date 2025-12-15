@@ -1,5 +1,3 @@
-// ShootThemUp Game. All Right Reserved.
-
 #include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "Engine/Engine.h"
 
