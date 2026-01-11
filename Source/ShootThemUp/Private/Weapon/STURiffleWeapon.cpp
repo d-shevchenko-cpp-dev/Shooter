@@ -26,14 +26,30 @@ void ASTURiffleWeapon::StartFire()
 
     MakeShot();
     StartAutomaticFire();
-
-    OnWeaponFireStarted.Broadcast();
 }
 
 void ASTURiffleWeapon::StopFire()
 {
     StopAutomaticFire();
-    OnWeaponFireStopped.Broadcast();
+}
+
+void ASTURiffleWeapon::StartAutomaticFire()
+{
+    if (!WeaponConfiguration)
+    {
+        return;
+    }
+
+    const float ShotDelay = WeaponConfiguration->ShotDelay;
+    if (ShotDelay > 0.0f)
+    {
+        GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTURiffleWeapon::MakeShot, ShotDelay, true);
+    }
+}
+
+void ASTURiffleWeapon::StopAutomaticFire()
+{
+    GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
 void ASTURiffleWeapon::MakeShot()
@@ -117,9 +133,6 @@ void ASTURiffleWeapon::DrawDebugInformation(const FVector& TraceStart,
 
 void ASTURiffleWeapon::ProcessHitResult(const FHitResult& HitResult)
 {
-    float DamageDealt = 0.0f;
-    bool bIsHeadshot = false;
-
     if (HitResult.bBlockingHit)
     {
         UE_LOG(LogRiffleWeapon,
@@ -130,10 +143,7 @@ void ASTURiffleWeapon::ProcessHitResult(const FHitResult& HitResult)
 
         if (AActor* HitActor = HitResult.GetActor())
         {
-            bIsHeadshot = IsHeadshot(HitResult.BoneName);
-            DamageDealt = ApplyDamageToTarget(HitActor, HitResult);
+            ApplyDamageToTarget(HitActor, HitResult);
         }
     }
-
-    OnWeaponShot.Broadcast(HitResult, DamageDealt, bIsHeadshot);
 }

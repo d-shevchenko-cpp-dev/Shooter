@@ -16,10 +16,19 @@ public:
     virtual void StopFire() override;
 
 protected:
-    virtual void MakeShot() override;
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StartAutomaticFire();
+
+    UFUNCTION(BlueprintCallable, Category = "Weapon")
+    virtual void StopAutomaticFire();
+
+    virtual void MakeShot();
 
 private:
     void DrawDebugInformation(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const;
 
     void ProcessHitResult(const FHitResult& HitResult);
+
+private:
+    FTimerHandle ShotTimerHandle;
 };

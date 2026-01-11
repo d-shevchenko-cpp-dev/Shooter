@@ -18,7 +18,7 @@ public:
     virtual void StopFire() override;
 
 protected:
-    virtual void MakeShot() override;
+    virtual void MakeShot();
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     TSubclassOf<ASTUProjectile> ProjectileClass;

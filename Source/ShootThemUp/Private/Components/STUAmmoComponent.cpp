@@ -74,15 +74,14 @@ bool USTUAmmoComponent::IsAmmoEmpty() const
 
 bool USTUAmmoComponent::CanReload() const
 {
-    //TODO: сделать проверку на то, что обойма полная или нет запасных обойм
-    if (!IsClipEmpty())
-    {
-        return false;
-    }
-
     if (CurrentAmmo.Infinite)
     {
         return true;
+    }
+
+    if (CurrentAmmo.Clips == 0 || CurrentAmmo.Bullets == DefaultAmmo.Bullets)
+    {
+        return false;
     }
 
     return CurrentAmmo.Clips > 0;

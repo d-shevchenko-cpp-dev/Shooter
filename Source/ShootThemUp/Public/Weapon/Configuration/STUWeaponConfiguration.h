@@ -58,7 +58,7 @@ public:
         BlueprintReadWrite,
         Category = "Weapon Settings",
         meta = (ClampMin = "1.0", ClampMax = "10.0"))
-    float HeadshotMultiplier = 2.0f;
+    float HeadshotMultiplier = 10.0f;
 
     /** Имя кости головы для определения headshot */
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Settings")

@@ -25,14 +25,8 @@ ASTUBaseWeapon::ASTUBaseWeapon()
 
 bool ASTUBaseWeapon::CanFire() const
 {
-    if (!IsValidForShooting())
+    if (!IsValidForShooting() || !WeaponConfiguration)
     {
-        return false;
-    }
-
-    if (!WeaponConfiguration)
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Weapon configuration is not valid"));
         return false;
     }
 
@@ -59,26 +53,6 @@ void ASTUBaseWeapon::BeginPlay()
     {
         AmmoComponent->Initialize({});
     }
-}
-
-void ASTUBaseWeapon::StartAutomaticFire()
-{
-    if (!WeaponConfiguration)
-    {
-        UE_LOG(LogBaseWeapon, Warning, TEXT("Weapon configuration is not valid"));
-        return;
-    }
-
-    const float ShotDelay = WeaponConfiguration->ShotDelay;
-    if (ShotDelay > 0.0f)
-    {
-        GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTUBaseWeapon::MakeShot, ShotDelay, true);
-    }
-}
-
-void ASTUBaseWeapon::StopAutomaticFire()
-{
-    GetWorldTimerManager().ClearTimer(ShotTimerHandle);
 }
 
 bool ASTUBaseWeapon::IsValidForShooting() const

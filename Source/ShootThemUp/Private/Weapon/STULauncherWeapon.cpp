@@ -2,7 +2,6 @@
 #include "Weapon/STUProjectile.h"
 #include "Weapon/Helpers/STUWeaponTraceHelper.h"
 #include "Components/STUAmmoComponent.h"
-#include "Weapon/Configuration/STUWeaponConfiguration.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
@@ -16,41 +15,20 @@ void ASTULauncherWeapon::StartFire()
 {
     if (!CanFire())
     {
-        UE_LOG(LogLauncherWeapon, Warning, TEXT("Cannot fire launcher"));
         return;
     }
 
-    UE_LOG(LogLauncherWeapon, Display, TEXT("Starting launcher fire"));
-
-    // Выполняем один выстрел (гранатометы стреляют по одному)
     MakeShot();
-
-    OnWeaponFireStarted.Broadcast();
 }
 
-void ASTULauncherWeapon::StopFire()
-{
-    UE_LOG(LogLauncherWeapon, Display, TEXT("Stopping launcher fire"));
-
-    // Гранатометы обычно не требуют остановки стрельбы
-    OnWeaponFireStopped.Broadcast();
-}
+void ASTULauncherWeapon::StopFire() {}
 
 void ASTULauncherWeapon::MakeShot()
 {
-    if (!IsValidForShooting())
+    if (!IsValidForShooting() || !ProjectileClass)
     {
-        UE_LOG(LogLauncherWeapon, Warning, TEXT("Launcher is not valid for shooting"));
         return;
     }
-
-    if (!ProjectileClass)
-    {
-        UE_LOG(LogLauncherWeapon, Error, TEXT("Projectile class is not set"));
-        return;
-    }
-
-    UE_LOG(LogLauncherWeapon, Log, TEXT("Launcher shot - creating projectile"));
 
     // Подготавливаем параметры для трассировки
     FWeaponTraceParams TraceParams;
@@ -67,18 +45,12 @@ void ASTULauncherWeapon::MakeShot()
         return;
     }
 
-    // Создание и запуск снаряда
     LaunchProjectile(TraceStart, TraceEnd);
 
-    // Уменьшаем патроны через компонент
     if (AmmoComponent)
     {
         AmmoComponent->TryDecreaseAmmo();
     }
-
-    // Создаем пустой результат попадания для события
-    FHitResult EmptyHitResult;
-    OnWeaponShot.Broadcast(EmptyHitResult, 0.0f, false);
 }
 
 void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd)
@@ -96,8 +68,6 @@ void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVect
         Projectile->SetShootDirection(LaunchDirection);
         Projectile->SetOwner(GetOwner());
         Projectile->FinishSpawning(SpawnTransform);
-
-        UE_LOG(LogLauncherWeapon, Log, TEXT("Projectile launched successfully"));
     }
     else
     {
