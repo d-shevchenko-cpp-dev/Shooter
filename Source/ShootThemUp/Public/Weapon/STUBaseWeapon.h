@@ -6,6 +6,7 @@
 #include "Engine/World.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Weapon/Configuration/STUWeaponConfiguration.h"
+#include "Weapon/STUWeaponTypes.h"
 #include "STUBaseWeapon.generated.h"
 
 class USkeletalMeshComponent;
@@ -37,6 +38,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "Weapon")
     USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 
+    FWeaponUIData GetUIData() const { return UIData; }
+
 protected:
     virtual void BeginPlay() override;
 
@@ -66,6 +69,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
     FName MuzzleSocketName = TEXT("MuzzleSocket");
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FWeaponUIData UIData;
 
 private:
     bool ValidateComponents() const;

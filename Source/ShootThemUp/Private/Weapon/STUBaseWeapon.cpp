@@ -30,8 +30,7 @@ bool ASTUBaseWeapon::CanFire() const
         return false;
     }
 
-    const float ShotDelay = WeaponConfiguration->ShotDelay;
-    return ShotDelay >= USTUWeaponConfiguration::MIN_SHOT_DELAY && ShotDelay <= USTUWeaponConfiguration::MAX_SHOT_DELAY;
+    return true;
 }
 
 void ASTUBaseWeapon::BeginPlay()
@@ -42,11 +41,6 @@ void ASTUBaseWeapon::BeginPlay()
     {
         UE_LOG(LogBaseWeapon, Error, TEXT("Weapon components validation failed"));
         return;
-    }
-
-    if (WeaponConfiguration)
-    {
-        WeaponConfiguration->ValidateConfiguration();
     }
 
     if (AmmoComponent)

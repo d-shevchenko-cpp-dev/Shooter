@@ -21,7 +21,7 @@ float USTUHealthComponent::GetHealth() const
 
 float USTUHealthComponent::GetHealthPercent() const
 {
-    return MaxHealth > 0.f ? Health / MaxHealth : 0.f;
+    return Health / MaxHealth;
 }
 
 bool USTUHealthComponent::IsDead() const
@@ -49,6 +49,8 @@ void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(MaxHealth > 0);
+
     // Инициализация здоровья до максимального значения
     SetHealth(MaxHealth);
 
@@ -66,8 +68,8 @@ void USTUHealthComponent::BeginPlay()
 
 void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor,
     float Damage,
-    const class UDamageType* DamageType,
-    class AController* InstigatedBy,
+    const UDamageType* DamageType,
+    AController* InstigatedBy,
     AActor* DamageCauser)
 {
     // Условия раннего выхода

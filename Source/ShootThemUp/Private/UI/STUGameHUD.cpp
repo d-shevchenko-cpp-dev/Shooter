@@ -1,13 +1,25 @@
 // Игра ShootThemUp. Все права защищены.
 
 #include "UI/STUGameHUD.h"
+
+#include "Blueprint/UserWidget.h"
 #include "Engine/Canvas.h"
 
 void ASTUGameHUD::DrawHUD()
 {
     Super::DrawHUD();
 
-    DrawCrossHair();
+    // DrawCrossHair();
+}
+
+void ASTUGameHUD::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (auto PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass))
+    {
+        PlayerHUDWidget->AddToViewport();
+    }
 }
 
 void ASTUGameHUD::DrawCrossHair()

@@ -1,0 +1,24 @@
+// ShootThemUp Game. All Right Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "Weapon/STUWeaponTypes.h"
+#include "STUPlayerHUDWidget.generated.h"
+
+UCLASS()
+class SHOOTTHEMUP_API USTUPlayerHUDWidget : public UUserWidget
+{
+	GENERATED_BODY()
+
+    UFUNCTION(BlueprintCallable, Category="Ui")
+    float GetHealthPercent() const;
+
+    UFUNCTION(BlueprintCallable, Category="Ui")
+    bool GetWeaponUIData(FWeaponUIData& UIData) const;
+
+    UFUNCTION(BlueprintCallable, Category="Ui")
+    FString GetCurrentAmmo() const;
+
+};

@@ -71,7 +71,7 @@ protected:
         BlueprintReadWrite,
         Category = "Heal",
         meta = (EditCondition = "AutoHeal",
-            ClampMin = 0.1f,
+            ClampMin = 0.01f,
             ClampMax = 10.f,
             ToolTip = "Time interval between each heal update"))
     float HealUpdateTime{ 0.3f };

@@ -1,16 +1,26 @@
 #include "Components/STUWeaponComponent.h"
-
 #include "STUAmmoComponent.h"
 #include "GameFramework/Character.h"
 #include "Animations/STUEquipWeaponAnimNotify.h"
 #include "Animations/STUReloadFinishedAnimNotify.h"
 #include "STUBaseWeapon.h"
+#include "Weapon/STUWeaponTypes.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
 USTUWeaponComponent::USTUWeaponComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
+}
+
+bool USTUWeaponComponent::GetWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (CurrentWeapon)
+    {
+        UIData = CurrentWeapon->GetUIData();
+        return true;
+    }
+    return false;
 }
 
 void USTUWeaponComponent::BeginPlay()
@@ -57,9 +67,9 @@ void USTUWeaponComponent::StopShooting()
 void USTUWeaponComponent::SpawnWeapons()
 {
     auto Character = GetCharacter();
-    check(GetWorld())
+    check(GetWorld());
 
-        for (const auto& Data : WeaponData)
+    for (const auto& Data : WeaponData)
     {
         auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(Data.WeaponClass);
         if (!Weapon)
@@ -94,7 +104,7 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
     if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
     {
-        UE_LOG(LogWeaponComponent, Warning, TEXT("Invalid Weapon Index"))
+        UE_LOG(LogWeaponComponent, Warning, TEXT("Invalid Weapon Index"));
         return;
     }
 

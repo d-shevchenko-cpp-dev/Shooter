@@ -2,9 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Weapon/STUWeaponTypes.h"
+#include "STUBaseWeapon.h"
 #include "STUWeaponComponent.generated.h"
-
-class ASTUBaseWeapon;
 
 USTRUCT(BlueprintType)
 struct FWeaponReloadAnimMontageData
@@ -33,6 +33,10 @@ public:
     void SwitchWeapon();
 
     void Reload();
+
+    ASTUBaseWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
+
+    bool GetWeaponUIData(FWeaponUIData& UIData) const;
 
 protected:
     virtual void BeginPlay() override;

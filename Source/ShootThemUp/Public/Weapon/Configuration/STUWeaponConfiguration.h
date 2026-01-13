@@ -14,17 +14,6 @@ class SHOOTTHEMUP_API USTUWeaponConfiguration : public UObject
 public:
     USTUWeaponConfiguration();
 
-    static constexpr float MIN_SHOT_DELAY = 0.01f;
-    static constexpr float MAX_SHOT_DELAY = 12.0f;
-    static constexpr float MIN_DAMAGE = 0.0f;
-    static constexpr float MAX_DAMAGE = 1000.0f;
-    static constexpr float MIN_HEADSHOT_MULTIPLIER = 1.0f;
-    static constexpr float MAX_HEADSHOT_MULTIPLIER = 10.0f;
-    static constexpr float MIN_RANGE = 100.0f;
-    static constexpr float MAX_RANGE = 1000000.0f;
-    static constexpr float MIN_SPREAD = 0.01f;
-    static constexpr float MAX_SPREAD = 12.0f;
-
     /** Максимальная дальность стрельбы */
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
@@ -98,13 +87,6 @@ public:
             ClampMax = "10.0",
             ToolTip = "Максимальный множитель разброса при критически низком здоровье"))
     float MaxHealthSpreadMultiplier = 3.0f;
-
-    /**
-     * Валидирует конфигурацию и исправляет некорректные значения
-     * @return True если конфигурация валидна
-     */
-    UFUNCTION(BlueprintCallable, Category = "Weapon Configuration")
-    bool ValidateConfiguration();
 
     /**
      * Получает разброс в радианах
