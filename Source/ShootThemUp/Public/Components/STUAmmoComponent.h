@@ -10,15 +10,15 @@ struct FAmmoData
     GENERATED_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
-    int32 Bullets = 15;
+    int32 BulletsInClip = 30;
 
     /** Количество обойм */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo", meta = (EditCondition = "!Infinite"))
-    int32 Clips = 10;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo", meta = (EditCondition = "!InfiniteCheat"))
+    int32 Bullets = 300;
 
     /** Бесконечные патроны */
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Ammo")
-    bool Infinite = false;
+    bool InfiniteCheat = false;
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

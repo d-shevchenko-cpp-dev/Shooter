@@ -15,10 +15,10 @@ void USTUAmmoComponent::Initialize(const FAmmoData& InitialAmmo)
 
     UE_LOG(LogAmmoComponent,
         Log,
-        TEXT("Ammo initialized: Bullets=%d, Clips=%d, Infinite=%d"),
+        TEXT("Ammo initialized: BulletsInClip=%d, Bullets=%d, InfiniteCheat=%d"),
+        CurrentAmmo.BulletsInClip,
         CurrentAmmo.Bullets,
-        CurrentAmmo.Clips,
-        CurrentAmmo.Infinite);
+        CurrentAmmo.InfiniteCheat);
 }
 
 bool USTUAmmoComponent::TryDecreaseAmmo()
@@ -29,7 +29,7 @@ bool USTUAmmoComponent::TryDecreaseAmmo()
         return false;
     }
 
-    CurrentAmmo.Bullets--;
+    CurrentAmmo.BulletsInClip--;
     LogAmmo();
 
     // Автоматическая перезарядка если обойма пуста
@@ -49,11 +49,12 @@ bool USTUAmmoComponent::TryReload()
         return false;
     }
 
-    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+    auto CurrentBullets = CurrentAmmo.BulletsInClip;
+    CurrentAmmo.BulletsInClip = DefaultAmmo.BulletsInClip;
 
-    if (!CurrentAmmo.Infinite)
+    if (!CurrentAmmo.InfiniteCheat)
     {
-        CurrentAmmo.Clips--;
+        CurrentAmmo.Bullets = CurrentAmmo.Bullets - CurrentAmmo.BulletsInClip + CurrentBullets;
     }
 
     UE_LOG(LogAmmoComponent, Display, TEXT("Reload completed"));
@@ -64,34 +65,34 @@ bool USTUAmmoComponent::TryReload()
 
 bool USTUAmmoComponent::IsClipEmpty() const
 {
-    return CurrentAmmo.Bullets == 0;
+    return CurrentAmmo.BulletsInClip == 0;
 }
 
 bool USTUAmmoComponent::IsAmmoEmpty() const
 {
-    return IsClipEmpty() && !CurrentAmmo.Infinite && CurrentAmmo.Clips == 0;
+    return IsClipEmpty() && !CurrentAmmo.InfiniteCheat && CurrentAmmo.Bullets == 0;
 }
 
 bool USTUAmmoComponent::CanReload() const
 {
-    if (CurrentAmmo.Infinite)
+    if (CurrentAmmo.InfiniteCheat)
     {
         return true;
     }
 
-    if (CurrentAmmo.Clips == 0 || CurrentAmmo.Bullets == DefaultAmmo.Bullets)
+    if (CurrentAmmo.Bullets == 0 || CurrentAmmo.BulletsInClip == DefaultAmmo.BulletsInClip)
     {
         return false;
     }
 
-    return CurrentAmmo.Clips > 0;
+    return CurrentAmmo.Bullets > 0;
 }
 
 void USTUAmmoComponent::LogAmmo() const
 {
     FString AmmoInfo = FString::Printf(TEXT("Ammo: %d / %s"),
-        CurrentAmmo.Bullets,
-        CurrentAmmo.Infinite ? TEXT("∞") : *FString::FromInt(CurrentAmmo.Clips));
+        CurrentAmmo.BulletsInClip,
+        CurrentAmmo.InfiniteCheat ? TEXT("∞") : *FString::FromInt(CurrentAmmo.Bullets));
 
     UE_LOG(LogAmmoComponent, Display, TEXT("%s"), *AmmoInfo);
 }

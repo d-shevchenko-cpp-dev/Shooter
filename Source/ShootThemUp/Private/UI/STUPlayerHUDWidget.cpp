@@ -60,5 +60,5 @@ FString USTUPlayerHUDWidget::GetCurrentAmmo() const
 
     auto CurrentAmmo = CurrentWeapon->GetAmmoComponent()->GetCurrentAmmo();
 
-    return FString::Printf(TEXT("%d / %d"), CurrentAmmo.Bullets, CurrentAmmo.Clips);
+    return FString::Printf(TEXT("%d / %d"), CurrentAmmo.BulletsInClip, CurrentAmmo.Bullets);
 }
