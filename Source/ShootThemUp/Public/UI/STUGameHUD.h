@@ -19,5 +19,5 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    void DrawCrossHair();
+    // void DrawCrossHair();
 };

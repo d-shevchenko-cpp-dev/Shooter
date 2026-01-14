@@ -15,10 +15,11 @@ public:
     ASTULauncherWeapon();
 
     virtual void StartFire() override;
-    virtual void StopFire() override;
 
 protected:
     virtual void MakeShot();
+
+    virtual void BeginPlay() override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     TSubclassOf<ASTUProjectile> ProjectileClass;

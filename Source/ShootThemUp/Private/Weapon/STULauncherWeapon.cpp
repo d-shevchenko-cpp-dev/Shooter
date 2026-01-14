@@ -6,10 +6,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogLauncherWeapon, All, All);
 
-ASTULauncherWeapon::ASTULauncherWeapon()
-{
-    AmmoComponent->Initialize({ 1, 10, false });
-}
+ASTULauncherWeapon::ASTULauncherWeapon() {}
 
 void ASTULauncherWeapon::StartFire()
 {
@@ -20,8 +17,6 @@ void ASTULauncherWeapon::StartFire()
 
     MakeShot();
 }
-
-void ASTULauncherWeapon::StopFire() {}
 
 void ASTULauncherWeapon::MakeShot()
 {
@@ -51,6 +46,12 @@ void ASTULauncherWeapon::MakeShot()
     {
         AmmoComponent->TryDecreaseAmmo();
     }
+}
+
+void ASTULauncherWeapon::BeginPlay()
+{
+    Super::BeginPlay();
+    AmmoComponent->Initialize({ 1, 10, false });
 }
 
 void ASTULauncherWeapon::LaunchProjectile(const FVector& TraceStart, const FVector& TraceEnd)

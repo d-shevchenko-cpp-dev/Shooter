@@ -25,7 +25,6 @@ bool USTUAmmoComponent::TryDecreaseAmmo()
 {
     if (IsAmmoEmpty())
     {
-        UE_LOG(LogAmmoComponent, Warning, TEXT("Cannot decrease ammo: ammo is empty"));
         return false;
     }
 
@@ -35,7 +34,7 @@ bool USTUAmmoComponent::TryDecreaseAmmo()
     // Автоматическая перезарядка если обойма пуста
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
-        TryReload();
+        OnClipEmpty.Broadcast();
     }
 
     return true;
@@ -45,7 +44,6 @@ bool USTUAmmoComponent::TryReload()
 {
     if (!CanReload())
     {
-        UE_LOG(LogAmmoComponent, Warning, TEXT("Cannot reload: no clips available or clip is full"));
         return false;
     }
 

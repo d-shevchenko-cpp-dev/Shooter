@@ -30,6 +30,10 @@ void USTUWeaponComponent::BeginPlay()
     SpawnWeapons();
     AttachWeaponsToActor();
     EquipWeapon(CurrentWeaponIndex);
+    for (const auto Weapon : Weapons)
+    {
+        Weapon->GetAmmoComponent()->OnClipEmpty.AddUObject(this, &USTUWeaponComponent::Reload);
+    }
 }
 
 void USTUWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

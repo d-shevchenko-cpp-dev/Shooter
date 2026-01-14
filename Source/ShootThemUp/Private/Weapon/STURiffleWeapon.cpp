@@ -9,10 +9,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiffleWeapon, All, All);
 
-ASTURiffleWeapon::ASTURiffleWeapon()
-{
-    AmmoComponent->Initialize({ 30, 5, false });
-}
+ASTURiffleWeapon::ASTURiffleWeapon() {}
 
 void ASTURiffleWeapon::StartFire()
 {

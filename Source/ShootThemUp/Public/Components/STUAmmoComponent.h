@@ -21,6 +21,8 @@ struct FAmmoData
     bool InfiniteCheat = false;
 };
 
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUAmmoComponent : public UActorComponent
 {
@@ -52,6 +54,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Ammo")
     void LogAmmo() const;
+
+    FOnClipEmptySignature OnClipEmpty;
 
 private:
     UPROPERTY()
