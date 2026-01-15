@@ -3,62 +3,60 @@
 #include "STUBaseWeapon.h"
 #include "STUWeaponComponent.h"
 #include "Components/STUHealthComponent.h"
+#include "Utils/STUUtils.h"
 
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {
-    const auto Player = GetOwningPlayerPawn();
-    if (!Player)
+    if (const auto HeathComponent = GetHeathComponent())
     {
-        return 0.0f;
+        return HeathComponent->GetHealthPercent();
     }
-
-    const auto Component = Player->GetComponentByClass(USTUHealthComponent::StaticClass());
-    const auto HealthComponent = Cast<USTUHealthComponent>(Component);
-    if (!HealthComponent)
-    {
-        return 0.0f;
-    }
-
-    return HealthComponent->GetHealthPercent();
+    return 0.0f;
 }
 
 bool USTUPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
 {
-    const auto Player = GetOwningPlayerPawn();
-    if (!Player)
+    if (const auto WeaponComponent = GetWeaponComponent())
     {
-        return false;
+        return WeaponComponent->GetWeaponUIData(UIData);
     }
-
-    const auto Component = Player->GetComponentByClass(USTUWeaponComponent::StaticClass());
-    const auto WeaponComponent = Cast<USTUWeaponComponent>(Component);
-    if (!WeaponComponent)
-    {
-        return false;
-    }
-
-    return WeaponComponent->GetWeaponUIData(UIData);
+    return nullptr;
 }
 
 FString USTUPlayerHUDWidget::GetCurrentAmmo() const
 {
-    const auto Player = GetOwningPlayerPawn();
-    if (!Player)
+    if (const auto WeaponComponent = GetWeaponComponent())
     {
-        return "N / N";
+        const auto CurrentWeapon = WeaponComponent->GetCurrentWeapon();
+        if (!CurrentWeapon)
+        {
+            return "";
+        }
+        auto CurrentAmmo = CurrentWeapon->GetAmmoComponent()->GetCurrentAmmo();
+
+        return FString::Printf(TEXT("%d / %d"), CurrentAmmo.BulletsInClip, CurrentAmmo.Bullets);
     }
+    return "";
+}
 
-    const auto Component = Player->GetComponentByClass(USTUWeaponComponent::StaticClass());
-    const auto WeaponComponent = Cast<USTUWeaponComponent>(Component);
-    if (!WeaponComponent)
-    {
-        return "N / N";
-    }
+bool USTUPlayerHUDWidget::IsPlayerAlive() const
+{
+    const auto HealthComponent = GetHeathComponent();
+    return HealthComponent && !HealthComponent->IsDead();
+}
 
-    const auto CurrentWeapon = WeaponComponent->GetCurrentWeapon();
-    check(CurrentWeapon);
+bool USTUPlayerHUDWidget::IsSpectatingMode() const
+{
+    const auto Controller = GetOwningPlayer();
+    return Controller && Controller->GetStateName() == NAME_Spectating;
+}
 
-    auto CurrentAmmo = CurrentWeapon->GetAmmoComponent()->GetCurrentAmmo();
+USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
+{
+    return STUUtils::GetSTUPlayerComponent<USTUWeaponComponent>(GetOwningPlayerPawn());
+}
 
-    return FString::Printf(TEXT("%d / %d"), CurrentAmmo.BulletsInClip, CurrentAmmo.Bullets);
+USTUHealthComponent* USTUPlayerHUDWidget::GetHeathComponent() const
+{
+    return STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
 }

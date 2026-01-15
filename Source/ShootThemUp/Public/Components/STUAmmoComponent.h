@@ -52,9 +52,6 @@ public:
     UFUNCTION(BlueprintPure, Category = "Ammo")
     FAmmoData GetCurrentAmmo() const { return CurrentAmmo; }
 
-    UFUNCTION(BlueprintCallable, Category = "Ammo")
-    void LogAmmo() const;
-
     FOnClipEmptySignature OnClipEmpty;
 
 private:

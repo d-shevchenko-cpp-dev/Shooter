@@ -1,8 +1,6 @@
 #include "Components/STUAmmoComponent.h"
 #include "Engine/Engine.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogAmmoComponent, All, All);
-
 USTUAmmoComponent::USTUAmmoComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
@@ -12,13 +10,6 @@ void USTUAmmoComponent::Initialize(const FAmmoData& InitialAmmo)
 {
     DefaultAmmo = InitialAmmo;
     CurrentAmmo = InitialAmmo;
-
-    UE_LOG(LogAmmoComponent,
-        Log,
-        TEXT("Ammo initialized: BulletsInClip=%d, Bullets=%d, InfiniteCheat=%d"),
-        CurrentAmmo.BulletsInClip,
-        CurrentAmmo.Bullets,
-        CurrentAmmo.InfiniteCheat);
 }
 
 bool USTUAmmoComponent::TryDecreaseAmmo()
@@ -29,9 +20,7 @@ bool USTUAmmoComponent::TryDecreaseAmmo()
     }
 
     CurrentAmmo.BulletsInClip--;
-    LogAmmo();
 
-    // Автоматическая перезарядка если обойма пуста
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
         OnClipEmpty.Broadcast();
@@ -54,9 +43,6 @@ bool USTUAmmoComponent::TryReload()
     {
         CurrentAmmo.Bullets = CurrentAmmo.Bullets - CurrentAmmo.BulletsInClip + CurrentBullets;
     }
-
-    UE_LOG(LogAmmoComponent, Display, TEXT("Reload completed"));
-    LogAmmo();
 
     return true;
 }
@@ -84,13 +70,4 @@ bool USTUAmmoComponent::CanReload() const
     }
 
     return CurrentAmmo.Bullets > 0;
-}
-
-void USTUAmmoComponent::LogAmmo() const
-{
-    FString AmmoInfo = FString::Printf(TEXT("Ammo: %d / %s"),
-        CurrentAmmo.BulletsInClip,
-        CurrentAmmo.InfiniteCheat ? TEXT("∞") : *FString::FromInt(CurrentAmmo.Bullets));
-
-    UE_LOG(LogAmmoComponent, Display, TEXT("%s"), *AmmoInfo);
 }

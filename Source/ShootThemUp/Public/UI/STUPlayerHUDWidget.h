@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "STUWeaponComponent.h"
+#include "STUHealthComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Weapon/STUWeaponTypes.h"
 #include "STUPlayerHUDWidget.generated.h"
@@ -20,4 +22,15 @@ class SHOOTTHEMUP_API USTUPlayerHUDWidget : public UUserWidget
 
     UFUNCTION(BlueprintCallable, Category = "Ui")
     FString GetCurrentAmmo() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Ui")
+    bool IsPlayerAlive() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Ui")
+    bool IsSpectatingMode() const;
+
+private:
+    USTUWeaponComponent* GetWeaponComponent() const;
+
+    USTUHealthComponent* GetHeathComponent() const;
 };
