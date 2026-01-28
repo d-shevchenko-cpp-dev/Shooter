@@ -6,10 +6,21 @@
 #include "GameFramework/Character.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Weapon/Components/STUWeaponFXComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRiffleWeapon, All, All);
 
-ASTURiffleWeapon::ASTURiffleWeapon() {}
+ASTURiffleWeapon::ASTURiffleWeapon()
+{
+    WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>("WeaponFXComponent");
+}
+
+void ASTURiffleWeapon::BeginPlay()
+{
+    Super::BeginPlay();
+
+    check(WeaponFXComponent);
+}
 
 void ASTURiffleWeapon::StartFire()
 {
@@ -78,7 +89,7 @@ void ASTURiffleWeapon::MakeShot()
     FHitResult HitResult;
     USTUWeaponTraceHelper::PerformLineTrace(GetWorld(), GetOwner(), TraceStart, TraceEnd, HitResult);
 
-    DrawDebugInformation(TraceStart, TraceEnd, HitResult);
+    // DrawDebugInformation(TraceStart, TraceEnd, HitResult);
 
     ProcessHitResult(HitResult);
 
@@ -132,15 +143,10 @@ void ASTURiffleWeapon::ProcessHitResult(const FHitResult& HitResult)
 {
     if (HitResult.bBlockingHit)
     {
-        UE_LOG(LogRiffleWeapon,
-            Log,
-            TEXT("Rifle hit target: %s at bone: %s"),
-            HitResult.GetActor() ? *HitResult.GetActor()->GetName() : TEXT("Unknown"),
-            *HitResult.BoneName.ToString());
-
         if (AActor* HitActor = HitResult.GetActor())
         {
             ApplyDamageToTarget(HitActor, HitResult);
         }
+        WeaponFXComponent->PlayImpactFX(HitResult);
     }
 }

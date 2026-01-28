@@ -1,4 +1,5 @@
 #include "Weapon/STUProjectile.h"
+#include "Weapon/Components/STUWeaponFXComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
@@ -15,12 +16,15 @@ ASTUProjectile::ASTUProjectile()
     CollisionComponent->InitSphereRadius(5.0f);
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    CollisionComponent->bReturnMaterialOnMove = true;
     SetRootComponent(CollisionComponent);
 
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComponent"));
     MovementComponent->InitialSpeed = 2000.0f;
     MovementComponent->MaxSpeed = 2000.0f;
     MovementComponent->ProjectileGravityScale = 1.0f;
+
+    WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>("WeaponFXComponent");
 }
 
 void ASTUProjectile::BeginPlay()
@@ -38,6 +42,8 @@ void ASTUProjectile::BeginPlay()
         UE_LOG(LogProjectile, Error, TEXT("CollisionComponent is not valid"));
         return;
     }
+
+    check(WeaponFXComponent);
 
     // Настройка движения снаряда
     MovementComponent->Velocity = ShootDirection * MovementComponent->InitialSpeed;
@@ -85,6 +91,8 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent,
 
     // Отрисовываем отладочную информацию
     DrawExplosionDebug(GetActorLocation());
+
+    WeaponFXComponent->PlayImpactFX(Hit);
 
     Destroy();
 }

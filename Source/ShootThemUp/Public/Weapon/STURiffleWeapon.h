@@ -4,6 +4,8 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "STURiffleWeapon.generated.h"
 
+class USTUWeaponFXComponent;
+
 UCLASS(BlueprintType, Blueprintable)
 class SHOOTTHEMUP_API ASTURiffleWeapon : public ASTUBaseWeapon
 {
@@ -11,6 +13,8 @@ class SHOOTTHEMUP_API ASTURiffleWeapon : public ASTUBaseWeapon
 
 public:
     ASTURiffleWeapon();
+
+    virtual void BeginPlay() override;
 
     virtual void StartFire() override;
     virtual void StopFire() override;
@@ -28,6 +32,10 @@ private:
     void DrawDebugInformation(const FVector& TraceStart, const FVector& TraceEnd, const FHitResult& HitResult) const;
 
     void ProcessHitResult(const FHitResult& HitResult);
+
+protected:
+    UPROPERTY(VisibleAnywhere, Category = "VFX")
+    USTUWeaponFXComponent* WeaponFXComponent;
 
 private:
     FTimerHandle ShotTimerHandle;

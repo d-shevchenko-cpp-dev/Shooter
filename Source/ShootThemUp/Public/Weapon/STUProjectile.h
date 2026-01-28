@@ -6,6 +6,7 @@
 
 class UProjectileMovementComponent;
 class USphereComponent;
+class USTUWeaponFXComponent;
 
 /**
  * Класс снаряда для гранатомета.
@@ -47,6 +48,9 @@ protected:
     /** Компонент движения снаряда */
     UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
     UProjectileMovementComponent* MovementComponent;
+
+    UPROPERTY(VisibleAnywhere, Category = "VFX")
+    USTUWeaponFXComponent* WeaponFXComponent;
 
     /** Радиус урона от взрыва */
     UPROPERTY(EditDefaultsOnly,
