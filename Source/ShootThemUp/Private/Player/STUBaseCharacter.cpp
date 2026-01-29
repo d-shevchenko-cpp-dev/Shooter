@@ -132,31 +132,29 @@ void ASTUBaseCharacter::OnDeath()
 {
     UE_LOG(BaseCharacter, All, TEXT("Player %s is dead"), *GetName());
 
-    // Остановка стрельбы при смерти
-    if (WeaponComponent)
-    {
-        WeaponComponent->StopShooting();
-    }
+    // if (DeathAnimMontage)
+    // {
+    //     PlayAnimMontage(DeathAnimMontage);
+    // }
 
-    // Воспроизведение анимации смерти, если доступна
-    if (DeathAnimMontage)
-    {
-        PlayAnimMontage(DeathAnimMontage);
-    }
-
-    // Отключение движения персонажа
-    check(GetCharacterMovement());
     GetCharacterMovement()->DisableMovement();
 
-    // Установка времени жизни перед уничтожением
     SetLifeSpan(DEATH_LIFESPAN);
 
-    // Изменение состояния контроллера на наблюдение
     if (Controller)
     {
         Controller->ChangeState(NAME_Spectating);
     }
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+    if (WeaponComponent)
+    {
+        WeaponComponent->StopShooting();
+    }
+
+    check(GetMesh());
+    GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->SetSimulatePhysics(true);
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float Health)
