@@ -41,7 +41,7 @@ private:
 
     // Обработчики здоровья и смерти
     void OnDeath();
-    void OnHealthChanged(float Health);
+    void OnHealthChanged(float Health, float HealthDelta);
 
     // Обработчик урона от приземления
     UFUNCTION()

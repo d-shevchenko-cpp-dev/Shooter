@@ -1,5 +1,7 @@
 #include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Controller.h"
+#include "Camera/CameraShakeBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All);
 
@@ -111,6 +113,8 @@ void USTUHealthComponent::OnTakeAnyDamageHandle(AActor* DamagedActor,
             TEXT("Auto-healing started for actor %s"),
             DamagedActor ? *DamagedActor->GetName() : TEXT("Unknown"));
     }
+
+    PlayCameraShake();
 }
 
 void USTUHealthComponent::HealUpdate()
@@ -131,13 +135,16 @@ void USTUHealthComponent::HealUpdate()
 
 void USTUHealthComponent::SetHealth(float NewHealth)
 {
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const auto HealthDelta = NextHealth - Health;
+
     const float OldHealth = Health;
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    Health = NextHealth;
 
     // Трансляция только если здоровье действительно изменилось
     if (!FMath::IsNearlyEqual(OldHealth, Health, MIN_HEALTH_THRESHOLD))
     {
-        OnHealthChanged.Broadcast(Health);
+        OnHealthChanged.Broadcast(Health, HealthDelta);
         UE_LOG(LogHealthComponent, VeryVerbose, TEXT("Health changed from %f to %f"), OldHealth, Health);
     }
 }
@@ -174,4 +181,26 @@ bool USTUHealthComponent::ValidateHealthParameters() const
     }
 
     return bIsValid;
+}
+
+void USTUHealthComponent::PlayCameraShake()
+{
+    if (IsDead())
+    {
+        return;
+    }
+
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player)
+    {
+        return;
+    }
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager)
+    {
+        return;
+    }
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
 }

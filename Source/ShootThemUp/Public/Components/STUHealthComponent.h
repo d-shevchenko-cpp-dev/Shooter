@@ -5,7 +5,9 @@
 #include "STUHealthComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDeath)
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, float);
+
+class UCameraShakeBase;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
@@ -54,6 +56,8 @@ private:
 
     bool ValidateHealthParameters() const;
 
+    void PlayCameraShake();
+
 protected:
     UPROPERTY(EditDefaultsOnly,
         BlueprintReadWrite,
@@ -93,6 +97,9 @@ protected:
             ClampMax = 100.f,
             ToolTip = "Amount of health restored per heal update"))
     float HealModifier{ 1.f };
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    TSubclassOf<UCameraShakeBase> CameraShake;
 
 private:
     FTimerHandle HealTimerHandle;

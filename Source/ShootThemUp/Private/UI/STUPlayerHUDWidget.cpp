@@ -51,6 +51,15 @@ bool USTUPlayerHUDWidget::IsSpectatingMode() const
     return Controller && Controller->GetStateName() == NAME_Spectating;
 }
 
+bool USTUPlayerHUDWidget::Initialize()
+{
+    if (auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn()))
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+    }
+    return Super::Initialize();
+}
+
 USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
 {
     return STUUtils::GetSTUPlayerComponent<USTUWeaponComponent>(GetOwningPlayerPawn());
@@ -59,4 +68,12 @@ USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
 USTUHealthComponent* USTUPlayerHUDWidget::GetHeathComponent() const
 {
     return STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
+}
+
+void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+    if (HealthDelta < 0.0f)
+    {
+        OnTakeDamage();
+    }
 }
